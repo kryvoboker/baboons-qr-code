@@ -1,0 +1,7 @@
+.idea
+/.db
+
+# Local environment files may contain credentials and must not be committed.
+**/.env
+**/.env.*
+!**/.env.example

@@ -1,0 +1,2 @@
+# Run every day at 4 AM
+#* * * * * timeout 600 /usr/local/bin/php -f /var/www/html/artisan schedule:run >> /var/log/cron.log 2>&1

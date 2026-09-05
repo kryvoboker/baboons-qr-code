@@ -1,0 +1,210 @@
+name: "dev-nuxt"
+
+services:
+  dev-nuxt-php-fpm:
+    build:
+      context: ${PWD}
+      dockerfile: .docker/dev/php/Dockerfile
+      target: development
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        UMASK: ${UMASK:-0002}
+        USERNAME: www-data
+    image: dev-nuxt-php-fpm:1.0
+    container_name: dev-nuxt-php-fpm
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - ../../.docker/dev/env/.env
+      - ../../.docker/dev/env/.env.mariadb
+    volumes:
+      - ../../httpdocs/backend:/var/www/html
+      - ../../storage:/var/www/storage
+      - ../../xhprof:/var/www/xhprof
+      - ../../.docker/dev/php/php.ini:/usr/local/etc/php/php.ini:ro
+    security_opt:
+      - no-new-privileges:true       # Disables setuid/setgid
+      - apparmor=docker-default      # Limits syscalls and file system
+    cap_drop:
+      - ALL # Removes Linux capabilities
+    depends_on:
+      dev-nuxt-mariadb:
+        condition: service_healthy
+    networks:
+      - dev-nuxt-net
+
+  dev-nuxt-cron:
+    build:
+      context: ${PWD}
+      dockerfile: .docker/dev/cron/Dockerfile
+      target: development
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        UMASK: ${UMASK:-0002}
+        USERNAME: www-data
+    image: dev-nuxt-cron:1.0-alpine
+    container_name: dev-nuxt-cron
+    restart: unless-stopped
+    env_file:
+      - ../../.docker/dev/env/.env
+      - ../../.docker/dev/env/.env.mariadb
+    volumes:
+      - ../../httpdocs/backend:/var/www/html:ro
+      - ../../storage:/var/www/storage
+      - ../../.docker/dev/cron/crontabs:/etc/crontabs
+    security_opt:
+      - no-new-privileges:true       # Disables setuid/setgid
+      - apparmor=docker-default      # Limits syscalls and file system
+    cap_drop:
+      - ALL # Removes Linux capabilities
+    depends_on:
+      dev-nuxt-php-fpm:
+        condition: service_started
+      dev-nuxt-mariadb:
+        condition: service_healthy
+    networks:
+      - dev-nuxt-net
+
+  dev-nuxt-nginx:
+    build:
+      context: ${PWD}
+      dockerfile: .docker/dev/nginx/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        UMASK: ${UMASK:-0002}
+        USERNAME: www-data
+    image: dev-nuxt-nginx:1.0-alpine-slim
+    container_name: dev-nuxt-nginx
+    restart: unless-stopped
+    env_file:
+      - ../../.docker/dev/env/.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dev-nuxt-nginx.rule=Host(`dev.api.dev-nuxt.com.ua`)"
+      - "traefik.http.routers.dev-nuxt-nginx.entrypoints=web"
+      - "traefik.http.services.dev-nuxt-nginx.loadbalancer.server.port=80"
+    volumes:
+      - ../../httpdocs/backend:/var/www/html:ro
+      - ../../storage:/var/www/storage:ro
+      - ../../.docker/dev/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    security_opt:
+      - no-new-privileges:true       # Disables setuid/setgid
+      - apparmor=docker-default      # Limits syscalls and file system
+    cap_drop:
+      - ALL # Removes Linux capabilities
+    depends_on:
+      - dev-nuxt-php-fpm
+    networks:
+      - traefik-network
+      - dev-nuxt-net
+
+  dev-nuxt-mariadb:
+    build:
+      context: ${PWD}
+      dockerfile: .docker/dev/mariadb/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        UMASK: ${UMASK:-0002}
+        USERNAME: mysql
+    image: dev-nuxt-mariadb:1.0
+    container_name: dev-nuxt-mariadb
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "mariadb-admin ping --protocol=tcp -h 127.0.0.1 -P 3306 -u$${MARIADB_USER} -p$${MARIADB_PASSWORD} --silent" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "3351:3306"
+    env_file:
+      - ../../.docker/dev/env/.env
+      - ../../.docker/dev/env/.env.mariadb
+    volumes:
+      - ../../.db/mariadb:/var/lib/mysql
+    security_opt:
+      - no-new-privileges:true       # Disables setuid/setgid
+      - apparmor=docker-default      # Limits syscalls and file system
+    cap_drop:
+      - ALL # Removes Linux capabilities
+    networks:
+      - dev-nuxt-net
+
+  dev-nuxt-nodejs:
+    build:
+      context: ${PWD}
+      dockerfile: .docker/dev/nodejs/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        UMASK: ${UMASK:-0002}
+        USERNAME: node
+    image: dev-nuxt-nodejs:1.0-trixie-slim
+    container_name: dev-nuxt-nodejs
+    restart: unless-stopped
+    env_file:
+      - ../../.docker/dev/env/.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.strateg-frontend-dev.rule=Host(`dev.dev-nuxt.com.ua`)"
+      - "traefik.http.routers.strateg-frontend-dev.entrypoints=web"
+      - "traefik.http.services.strateg-frontend-dev.loadbalancer.server.port=80"
+    ports:
+      - "3000:3000"  # Nuxt
+      - "9229:9229"  # Node inspector
+    volumes:
+      - ../../httpdocs/frontend:/var/www/html
+      - ../../storage:/var/www/storage
+    security_opt:
+      - no-new-privileges:true       # Disables setuid/setgid
+      - apparmor=docker-default      # Limits syscalls and file system
+    cap_drop:
+      - ALL # Removes Linux capabilities
+    networks:
+      - traefik-network
+      - dev-nuxt-net
+
+  dev-nuxt-redis:
+    build:
+      context: ${PWD}
+      dockerfile: .docker/dev/redis/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        UMASK: ${UMASK:-0002}
+        USERNAME: redis
+    image: dev-nuxt-redis:1.0-alpine
+    container_name: dev-nuxt-redis
+    restart: unless-stopped
+    ports:
+      - "42607:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - ../../.db/redis:/data
+    init: true # Ensures proper signal handling and zombie reaping
+    security_opt:
+      - no-new-privileges:true
+      - apparmor=docker-default
+    cap_drop:
+      - ALL # Removes Linux capabilities
+    networks:
+      - dev-nuxt-net
+
+networks:
+  traefik-network:
+    name: traefik-network
+    driver: bridge
+    external: true
+  dev-nuxt-net:
+    name: dev-nuxt-net
+    driver: bridge
+    external: true
