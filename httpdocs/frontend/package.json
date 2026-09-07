@@ -10,8 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@noble/hashes": "^2.4.0",
     "@pinia/nuxt": "^1.0.2",
     "@tailwindcss/vite": "^4.3.3",
+    "@noble/hashes": "^2.0.1",
     "nuxt": "^4.5.2",
     "pinia": "^4.0.3",
     "pinia-plugin-persistedstate": "^4.7.1",

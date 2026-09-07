@@ -37,6 +37,17 @@ docker exec dev-nuxt-php-fpm php artisan route:list
 
 MariaDB and Redis should report healthy status in Docker. The backend currently exposes the Laravel root route; application hosts are defined by the Traefik labels in the Compose file.
 
+## Try the API connection
+
+Open the Nuxt application and go to `/login`. After a successful login, the home page calls Laravel's protected `/api/auth/me` endpoint with the Passport Bearer token. A user account must already exist in the backend database.
+
+To inspect the API contract and configured routes:
+
+```bash
+docker exec dev-nuxt-php-fpm php artisan route:list --path=api/auth
+docker exec dev-nuxt-php-fpm php artisan passport:keys
+```
+
 ## Stop the stack
 
 ```bash
@@ -47,4 +58,3 @@ make down-dev
 
 - [Configuration](configuration.md) — environment files and service settings
 - [Testing](testing.md) — verification commands
-

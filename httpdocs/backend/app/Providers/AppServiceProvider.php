@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use Carbon\CarbonInterval;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,5 +35,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         require_once app_path('Supports/helpers.php');
+
+        Passport::tokensExpireIn(CarbonInterval::minutes(15));
+        Passport::refreshTokensExpireIn(CarbonInterval::days(30));
+        Passport::personalAccessTokensExpireIn(CarbonInterval::days(7));
+        Passport::authorizationView('passport.authorize');
     }
 }

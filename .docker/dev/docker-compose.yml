@@ -153,7 +153,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.strateg-frontend-dev.rule=Host(`dev.dev-nuxt.com.ua`)"
       - "traefik.http.routers.strateg-frontend-dev.entrypoints=web"
-      - "traefik.http.services.strateg-frontend-dev.loadbalancer.server.port=80"
+      - "traefik.http.services.strateg-frontend-dev.loadbalancer.server.port=3000"
     ports:
       - "3000:3000"  # Nuxt
       - "9229:9229"  # Node inspector
