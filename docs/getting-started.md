@@ -4,49 +4,46 @@
 
 ## Prerequisites
 
-- Docker Engine and Docker Compose.
+- Docker Engine with Docker Compose.
 - GNU Make.
-- Access to the external Docker networks `traefik-network` and `dev-nuxt-net`.
+- External Docker networks used by the Compose file: `traefik-network` and `dev-nuxt-net`.
+- Local development environment files in `.docker/dev/env/`.
 
-PHP 8.5.10 and Composer 2.9.2 are available in the `dev-nuxt-php-fpm` container; a host PHP installation is not required.
+The application runs PHP, Composer, PostgreSQL, Redis, Nuxt, Nginx, and the QR renderer in containers.
 
-## Start the development stack
+## Start the stack
 
 ```bash
 make up-dev
+docker compose -f .docker/dev/docker-compose.yml ps
 ```
 
-The command starts PHP-FPM, Nginx, Node.js, MariaDB, Redis, and the cron container from `.docker/dev/docker-compose.yml`.
-
-## Install or refresh dependencies
+If the Make target is unavailable, use:
 
 ```bash
-docker exec dev-nuxt-php-fpm composer install
-docker exec dev-nuxt-nodejs npm install
+docker compose -f .docker/dev/docker-compose.yml up -d
 ```
 
-The mounted application directories are `httpdocs/backend` and `httpdocs/frontend`, so dependency changes are visible on the host.
-
-## Verify the installation
+## Verify Laravel and Nuxt
 
 ```bash
-docker ps
-docker exec dev-nuxt-php-fpm php artisan about
-docker exec dev-nuxt-php-fpm php artisan route:list
+docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm php artisan about
+docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm php artisan route:list
+docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-nodejs npm run ts:typecheck
 ```
 
-MariaDB and Redis should report healthy status in Docker. The backend currently exposes the Laravel root route; application hosts are defined by the Traefik labels in the Compose file.
+The dev hosts are configured by Traefik labels:
 
-## Try the API connection
+- Frontend: `http://dev.dev-nuxt.com.ua`
+- Laravel: `http://dev.api.dev-nuxt.com.ua`
 
-Open the Nuxt application and go to `/login`. After a successful login, the home page calls Laravel's protected `/api/auth/me` endpoint with the Passport Bearer token. A user account must already exist in the backend database.
+## First workflow
 
-To inspect the API contract and configured routes:
-
-```bash
-docker exec dev-nuxt-php-fpm php artisan route:list --path=api/auth
-docker exec dev-nuxt-php-fpm php artisan passport:keys
-```
+1. Open the frontend.
+2. Generate a static QR without signing in.
+3. Use **Log in** when an account feature is needed.
+4. Complete the Laravel Passport login.
+5. Save a QR code or open the dashboard.
 
 ## Stop the stack
 
@@ -56,5 +53,6 @@ make down-dev
 
 ## See Also
 
-- [Configuration](configuration.md) — environment files and service settings
+- [Architecture](architecture.md) — service boundaries and data flow
+- [Configuration](configuration.md) — environment variables
 - [Testing](testing.md) — verification commands

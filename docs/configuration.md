@@ -1,65 +1,60 @@
-[← Architecture](architecture.md) · [Back to README](../README.md) · [Deployment →](deployment.md)
+[← QR Codes and Storage](qr-codes.md) · [Back to README](../README.md) · [Deployment →](deployment.md)
 
 # Configuration
 
-## Docker Compose
+## Docker services
 
-The development stack is defined in `.docker/dev/docker-compose.yml`. It loads common settings from `.docker/dev/env/.env` and database settings from `.docker/dev/env/.env.mariadb`.
+The development Compose file is `.docker/dev/docker-compose.yml`.
 
-| Service | Purpose | Host exposure |
-|---------|---------|---------------|
-| `dev-nuxt-php-fpm` | Laravel PHP runtime | Internal port 9000 |
-| `dev-nuxt-nginx` | HTTP entrypoint | Via Traefik |
-| `dev-nuxt-nodejs` | Nuxt development server | `3000` |
-| `dev-nuxt-mariadb` | Relational database | `3351 → 3306` |
-| `dev-nuxt-redis` | Cache/queue backend | `42607 → 6379` |
-| `dev-nuxt-cron` | Scheduled Laravel commands | Internal |
+| Service | Role |
+|---|---|
+| `dev-nuxt-php-fpm` | Laravel PHP runtime |
+| `dev-nuxt-nginx` | Laravel HTTP entrypoint |
+| `dev-nuxt-nodejs` | Nuxt development server and BFF |
+| `dev-nuxt-postgresql` | PostgreSQL database |
+| `dev-nuxt-redis` | Redis service |
+| `dev-nuxt-cron` | Scheduled Laravel commands |
 
-## Environment variables
+## Important variables
 
-Do not copy credentials into documentation or commit them to source control.
+Never commit actual values from local env files.
 
-| Variable | Source | Purpose |
-|----------|--------|---------|
-| `APP_ENV` | `.docker/dev/env/.env` | Laravel environment, currently local |
-| `NEW_STORAGE_PATH` | `.docker/dev/env/.env` | Mounted application storage path |
-| `COMMON_DB_HOSTNAME` | `.env.mariadb` | MariaDB service name on the Docker network |
-| `COMMON_DB_PORT` | `.env.mariadb` | MariaDB container port |
-| `COMMON_DB_PREFIX` | `.env.mariadb` | Shared database table prefix |
-| `MARIADB_DATABASE` | `.env.mariadb` | Development database name |
-| `MARIADB_USER` | `.env.mariadb` | Development database user |
-| `MARIADB_PASSWORD` | `.env.mariadb` | Development database password; keep secret |
-| `MARIADB_ROOT_PASSWORD` | `.env.mariadb` | MariaDB root password; keep secret |
+| Variable | Consumer | Purpose |
+|---|---|---|
+| `APP_URL` | Laravel | API and dynamic redirect base URL |
+| `FRONTEND_URL` | Laravel | Nuxt origin used in reset links and OAuth |
+| `NEW_STORAGE_PATH` | Laravel | Mounted Laravel storage path |
+| `DB_CONNECTION` | Laravel | `pgsql` in current dev stack |
+| `POSTGRES_DB` | PHP/PostgreSQL | Database name |
+| `POSTGRES_SIMPLE_USER` | PHP/PostgreSQL | Application database user |
+| `POSTGRES_SIMPLE_PASSWORD` | PHP/PostgreSQL | Application database password |
+| `BFF_SHARED_SECRET` | Laravel | Validates trusted Nuxt-to-Laravel requests |
+| `NUXT_BFF_SHARED_SECRET` | Nuxt | Sends the same BFF secret internally |
+| `NUXT_PUBLIC_PASSPORT_CLIENT_ID` | Nuxt | Public Passport client UUID |
+| `NUXT_PUBLIC_PASSPORT_REDIRECT_URI` | Nuxt | Exact OAuth callback URI |
+| `NUXT_BACKEND_INTERNAL_BASE` | Nuxt | Internal Laravel URL, usually `http://dev-nuxt-nginx` |
+| `NUXT_PUBLIC_BACKEND_BASE` | Browser/Nuxt | Public Laravel URL used for OAuth navigation |
+| `NUXT_AUTH_COOKIE_SECURE` | Nuxt | Set `true` when using HTTPS |
+| `QR_RENDERER_SHARED_SECRET` | Laravel/renderer | Authenticates renderer requests |
+| `NUXT_QR_RENDERER_SHARED_SECRET` | Nuxt/renderer | Authenticates Nuxt renderer requests |
 
-PHP settings, including Xdebug and XHProf, are mounted from `.docker/dev/php/php.ini`. Nginx routing, security headers, FastCGI timeouts, and upload limits are in `.docker/dev/nginx/nginx.conf`.
+## Laravel configuration
 
-## Laravel API and Nuxt authentication
+- `config/auth.php` maps the `api` guard to Passport.
+- `config/baboons.php` contains frontend, storage, renderer, billing, and BFF settings.
+- `config/session.php` controls Laravel's authorization web session.
+- `config/cors.php` controls direct browser cross-origin requests.
+- `bootstrap/app.php` registers API JSON behavior and the `bff.secret` middleware.
 
-The backend uses Laravel Passport as the `api` guard. Passport signs the access token with its private key; the frontend sends it as an OAuth2-compatible Bearer token. A separate JWT package is not needed for this setup.
+## Nuxt configuration
 
-The Nuxt browser is registered as a public Passport client with Authorization Code + PKCE. It has a client ID but no client secret. The PKCE verifier is kept in `sessionStorage` only until the callback; access and refresh tokens stay in memory and are never persisted by Pinia.
-
-The shop is guest-first: public catalog, cart, and informational pages must not use `auth` middleware. Only account-specific operations should call the protected endpoint.
-
-Available endpoints:
-
-| Method | Endpoint | Auth | Purpose |
-|--------|----------|------|---------|
-| `GET` | `/api/auth/me` | Bearer | Return the current user |
-| `POST` | `/api/auth/logout` | Bearer | Revoke the current token |
-
-OAuth endpoints are provided by Passport:
-
-- `GET /oauth/authorize` — starts the authorization flow;
-- `POST /oauth/token` — exchanges the authorization code or refresh token.
-
-Nuxt calls these endpoints through `app/composables/useApi.ts` and keeps the access token in runtime memory. Pinia persistence stores only the user profile, not the token. This is intentional: a browser token in `localStorage` or persisted Pinia state is easier to steal through XSS.
-
-Login is opt-in. `/login` starts the OAuth flow, Laravel displays the login form, and successful authorization returns the browser to `/auth/callback`. If the user cancels or does not log in, they remain a guest and can continue using public pages.
-
-For local development, set `NUXT_PUBLIC_API_BASE` (default: `http://dev.api.dev-nuxt.com.ua`), `NUXT_PUBLIC_OAUTH_CLIENT_ID`, and `NUXT_PUBLIC_OAUTH_REDIRECT_URI`; keep Laravel CORS origins aligned with the frontend origin. Production must use HTTPS and a separately registered redirect URI.
+- `runtimeConfig` separates server-only internal URLs/secrets from public OAuth values.
+- `routeRules` disables SSR for authenticated application screens.
+- `server/api/bff/[...path].ts` is the Laravel proxy boundary.
+- `app/middleware/auth.ts` protects account pages.
 
 ## See Also
 
-- [Getting Started](getting-started.md) — start commands
-- [Deployment](deployment.md) — environment separation
+- [Authentication](authentication.md) — OAuth variables and cookies
+- [Getting Started](getting-started.md) — starting Docker
+- [Deployment](deployment.md) — production configuration

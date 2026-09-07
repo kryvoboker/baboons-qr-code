@@ -2,29 +2,39 @@
 
 # Deployment
 
-## Current runtime model
+## Current status
 
-The checked-in Docker configuration is a development stack. It uses bind mounts, local environment files, debug tooling, and exposed development ports. Treat it as a reference for local development, not as a production hardening profile.
+The checked-in Compose configuration is for development. It uses bind mounts, local env files, debug tooling, and development hostnames. It is not a production image strategy.
 
-## Service topology
+## Production topology
 
-- Nginx receives backend traffic and forwards PHP requests to `dev-nuxt-php-fpm`.
-- Nuxt runs separately in `dev-nuxt-nodejs` on port `3000`.
-- MariaDB and Redis are persistent services with health checks.
-- Cron runs scheduled Laravel commands when a crontab entry is enabled.
-- Traefik labels publish the backend and frontend through development hostnames.
+Use separate application origins or sibling subdomains:
 
-## Production checklist
+```text
+app.example.com  → Nuxt
+api.example.com  → Laravel
+q.example.com    → Laravel dynamic redirects
+cdn.example.com  → object storage or shared media
+```
 
-- Use a production Compose/hosting configuration with immutable images and no source bind mounts.
-- Inject secrets through the deployment platform, not committed `.env` files.
-- Disable debug tools such as Xdebug and XHProf unless explicitly required.
-- Restrict database and Redis network exposure.
-- Configure TLS at the edge and review forwarded-header trust ranges.
-- Run migrations deliberately and verify backups, logs, health checks, and queue workers.
+The Nuxt BFF should reach Laravel over a private network. The browser should not receive internal service URLs or secrets.
+
+## Checklist
+
+- Build immutable PHP, Nuxt, and renderer images.
+- Remove source bind mounts and development ports.
+- Inject secrets through the deployment platform.
+- Use HTTPS and `NUXT_AUTH_COOKIE_SECURE=true`.
+- Register exact OAuth redirect URIs.
+- Use S3-compatible or network-shared storage for multiple hosts.
+- Restrict PostgreSQL, Redis, renderer, and internal BFF access.
+- Disable debugbar, Xdebug, and XHProf in production.
+- Run migrations deliberately and verify queues, cron, logs, backups, and health checks.
+- Configure a real payment provider and signed webhooks before charging users.
 
 ## See Also
 
-- [Configuration](configuration.md) — current development settings
-- [Testing](testing.md) — pre-deployment checks
+- [Configuration](configuration.md) — environment variables
+- [Authentication](authentication.md) — production auth constraints
+- [Testing](testing.md) — release verification
 

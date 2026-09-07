@@ -1,43 +1,45 @@
-[← Deployment](deployment.md) · [Back to README](../README.md)
+[← Deployment](deployment.md) · [Back to README](../README.md) · [OpenAPI →](openapi.yaml)
 
 # Testing
 
-## Backend tests
-
-The backend uses PHPUnit through Laravel's test runner.
+## Backend
 
 ```bash
-docker exec dev-nuxt-php-fpm php artisan test --compact
+docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm php artisan test --compact
+docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm vendor/bin/pint --format agent
 ```
 
-For a focused run, pass a test path or filter:
+## Frontend
 
 ```bash
-docker exec dev-nuxt-php-fpm php artisan test --compact tests/Feature/ExampleTest.php
-docker exec dev-nuxt-php-fpm php artisan test --compact --filter=ExampleTest
+docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-nodejs npm run ts:typecheck
+docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-nodejs npm run ts:check
 ```
 
-Format changed PHP files with Pint:
+`ts:typecheck` runs TypeScript only. `ts:check` also runs Biome and can report formatting/lint issues.
+
+## API smoke checks
 
 ```bash
-docker exec dev-nuxt-php-fpm vendor/bin/pint --dirty --format agent
+docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm php artisan route:list --except-vendor --path=api
+docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm php artisan passport:keys
 ```
 
-## Frontend checks
+Use Chrome DevTools for browser checks:
 
-The Nuxt package currently defines build, development, generate, and preview scripts. Run them in the Node container:
+1. Open a public page and confirm no failed requests.
+2. Open pricing and expect `/api/bff/v1/billing/plans` with HTTP `200`.
+3. Open a protected page while logged out and expect a redirect to `/auth/login`.
+4. Complete Passport login and confirm `/api/bff/v1/auth/user` returns `200`.
+5. Reload the protected page and confirm the user remains logged in.
 
-```bash
-docker exec dev-nuxt-nodejs npm run build
-docker exec dev-nuxt-nodejs npm run generate
-```
+## OpenAPI validation
 
-## Integration verification
-
-Before considering a local change complete, confirm that MariaDB and Redis are healthy, Laravel can boot, routes resolve, and the frontend build succeeds. Keep credentials and local runtime data outside committed changes.
+Use an OpenAPI 3.1-compatible validator in CI or an API client. Keep `docs/openapi.yaml` synchronized with `httpdocs/backend/routes/api.php`.
 
 ## See Also
 
-- [Getting Started](getting-started.md) — start the containers
-- [Deployment](deployment.md) — release checklist
+- [Getting Started](getting-started.md) — local verification
+- [API Reference](api.md) — endpoint behavior
+- [OpenAPI](openapi.yaml) — machine-readable schema
 

@@ -1,0 +1,542 @@
+openapi: 3.1.0
+info:
+  title: Baboons QR-code API
+  version: 1.0.0
+  description: |
+    Laravel API used by the Nuxt server-side BFF. Browser clients should call
+    the Nuxt /api/bff proxy; the BFF adds the internal secret and Bearer token.
+servers:
+  - url: http://dev.api.dev-nuxt.com.ua
+    description: Local development Laravel host
+tags:
+  - name: Authentication
+  - name: QR codes
+  - name: Folders
+  - name: Templates
+  - name: Notifications
+  - name: Billing
+  - name: Assets
+paths:
+  /api/v1/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a user
+      security: [{ BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/UserCreated' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/auth/session:
+    post:
+      tags: [Authentication]
+      summary: Legacy Laravel web-session bootstrap
+      security: [{ BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/UserResponse' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Authentication]
+      summary: Clear the Laravel web session
+      security: [{ BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /api/v1/auth/forgot-password:
+    post:
+      tags: [Authentication]
+      summary: Send a password reset link
+      security: [{ BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/auth/reset-password:
+    post:
+      tags: [Authentication]
+      summary: Reset a password
+      security: [{ BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, email, password, password_confirmation]
+              properties:
+                token: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 10, format: password }
+                password_confirmation: { type: string, format: password }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/auth/user:
+    get:
+      tags: [Authentication]
+      summary: Get the current user
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/UserResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/v1/auth/token:
+    delete:
+      tags: [Authentication]
+      summary: Revoke the current access and refresh tokens
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /api/v1/dashboard:
+    get:
+      tags: [Authentication]
+      summary: Get dashboard summary
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/v1/qr-codes:
+    get:
+      tags: [QR codes]
+      summary: List QR codes
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/Search' }
+        - { name: folder_id, in: query, schema: { type: integer } }
+        - { name: mode, in: query, schema: { type: string, enum: [static, dynamic] } }
+        - { $ref: '#/components/parameters/Page' }
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+    post:
+      tags: [QR codes]
+      summary: Create a QR code
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QrCodeRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/DataResponse' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/qr-codes/{qrCode}:
+    parameters:
+      - { $ref: '#/components/parameters/QrCodeId' }
+    get:
+      tags: [QR codes]
+      summary: Get a QR code
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [QR codes]
+      summary: Update a QR code
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QrCodeUpdateRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+    patch:
+      tags: [QR codes]
+      summary: Partially update a QR code
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QrCodeUpdateRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+    delete:
+      tags: [QR codes]
+      summary: Delete a QR code
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '204': { description: QR code deleted }
+  /api/v1/qr-codes/{qrCode}/analytics:
+    get:
+      tags: [QR codes]
+      summary: Get the last 30 days of analytics
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/QrCodeId' }
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+  /api/v1/qr-codes/{qrCode}/template:
+    post:
+      tags: [Templates]
+      summary: Create a template from a QR code
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/QrCodeId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, maxLength: 120 }
+      responses:
+        '201': { $ref: '#/components/responses/DataResponse' }
+  /api/v1/folders:
+    get:
+      tags: [Folders]
+      summary: List folders
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+    post:
+      tags: [Folders]
+      summary: Create a folder
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, maxLength: 120 }
+      responses:
+        '201': { $ref: '#/components/responses/DataResponse' }
+  /api/v1/folders/{folder}:
+    parameters:
+      - { $ref: '#/components/parameters/FolderId' }
+    put:
+      tags: [Folders]
+      summary: Rename a folder
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NameRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+    patch:
+      tags: [Folders]
+      summary: Rename a folder
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NameRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+    delete:
+      tags: [Folders]
+      summary: Delete a folder
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '204': { description: Folder deleted }
+  /api/v1/templates:
+    get:
+      tags: [Templates]
+      summary: List templates
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+    post:
+      tags: [Templates]
+      summary: Create a template
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TemplateRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/DataResponse' }
+  /api/v1/templates/{template}:
+    parameters:
+      - { $ref: '#/components/parameters/TemplateId' }
+    put:
+      tags: [Templates]
+      summary: Update a template
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TemplateUpdateRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+    patch:
+      tags: [Templates]
+      summary: Update a template
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TemplateUpdateRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+    delete:
+      tags: [Templates]
+      summary: Delete a template
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /api/v1/notifications:
+    get:
+      tags: [Notifications]
+      summary: List notifications
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+  /api/v1/notifications/{notificationId}/read:
+    patch:
+      tags: [Notifications]
+      summary: Mark a notification as read
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      parameters:
+        - { name: notificationId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /api/v1/notifications/read-all:
+    patch:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+  /api/v1/profile:
+    put:
+      tags: [Authentication]
+      summary: Update profile
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+    patch:
+      tags: [Authentication]
+      summary: Update profile
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+  /api/v1/billing/plans:
+    get:
+      tags: [Billing]
+      summary: List billing plans
+      security: [{ BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+  /api/v1/billing/checkout:
+    post:
+      tags: [Billing]
+      summary: Create a demo checkout
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [plan_code]
+              properties:
+                plan_code: { type: string, example: starter }
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+  /api/v1/billing/subscription:
+    get:
+      tags: [Billing]
+      summary: Get the current subscription
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      responses:
+        '200': { $ref: '#/components/responses/DataResponse' }
+  /api/v1/assets/logo:
+    post:
+      tags: [Assets]
+      summary: Upload an authenticated user logo
+      security: [{ BearerAuth: [], BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: '#/components/schemas/LogoUpload' }
+      responses:
+        '201': { $ref: '#/components/responses/DataResponse' }
+  /api/v1/guest-assets/logo:
+    post:
+      tags: [Assets]
+      summary: Upload a guest logo
+      security: [{ BffSecret: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: '#/components/schemas/GuestLogoUpload' }
+      responses:
+        '201': { $ref: '#/components/responses/DataResponse' }
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth2
+    BffSecret:
+      type: apiKey
+      in: header
+      name: X-Baboons-BFF-Secret
+  parameters:
+    QrCodeId: { name: qrCode, in: path, required: true, schema: { type: string, format: uuid } }
+    FolderId: { name: folder, in: path, required: true, schema: { type: integer } }
+    TemplateId: { name: template, in: path, required: true, schema: { type: integer } }
+    Search: { name: search, in: query, schema: { type: string } }
+    Page: { name: page, in: query, schema: { type: integer, minimum: 1 } }
+  responses:
+    Ok:
+      description: Operation succeeded
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ok]
+            properties: { ok: { type: boolean, const: true } }
+    UserResponse:
+      description: Current user
+      content:
+        application/json:
+          schema:
+            type: object
+            properties: { user: { $ref: '#/components/schemas/User' } }
+    UserCreated:
+      description: User created
+      content:
+        application/json:
+          schema:
+            type: object
+            properties: { user: { $ref: '#/components/schemas/User' } }
+    DataResponse:
+      description: Resource or collection response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties: { data: {} }
+    ValidationError:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message: { type: string }
+              errors: { type: object, additionalProperties: { type: array, items: { type: string } } }
+    Unauthorized:
+      description: Authentication required
+    NotFound:
+      description: Resource not found
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string, format: email }
+        timezone: { type: string }
+        locale: { type: string }
+    RegisterRequest:
+      type: object
+      required: [name, email, password, password_confirmation]
+      properties:
+        name: { type: string, maxLength: 120 }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 10, format: password }
+        password_confirmation: { type: string, format: password }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+    NameRequest:
+      type: object
+      required: [name]
+      properties: { name: { type: string, maxLength: 120 } }
+    QrCodeRequest:
+      type: object
+      required: [name, kind, mode, payload, design]
+      properties:
+        name: { type: string, maxLength: 120 }
+        kind: { type: string, maxLength: 40 }
+        mode: { type: string, enum: [static, dynamic] }
+        payload: { type: object, additionalProperties: true }
+        design: { type: object, additionalProperties: true }
+        folder_id: { type: integer, nullable: true }
+        destination_url: { type: string, format: uri, nullable: true }
+    QrCodeUpdateRequest:
+      type: object
+      properties:
+        name: { type: string, maxLength: 120 }
+        payload: { type: object, additionalProperties: true }
+        design: { type: object, additionalProperties: true }
+        folder_id: { type: integer, nullable: true }
+        destination_url: { type: string, format: uri, nullable: true }
+        is_active: { type: boolean }
+    TemplateRequest:
+      type: object
+      required: [name, kind, design]
+      properties:
+        name: { type: string, maxLength: 120 }
+        kind: { type: string, maxLength: 40 }
+        design: { type: object, additionalProperties: true }
+        source_qr_code_id: { type: string, format: uuid, nullable: true }
+    TemplateUpdateRequest:
+      type: object
+      properties:
+        name: { type: string, maxLength: 120 }
+        kind: { type: string, maxLength: 40 }
+        design: { type: object, additionalProperties: true }
+    ProfileRequest:
+      type: object
+      required: [name, timezone, locale]
+      properties:
+        name: { type: string, maxLength: 120 }
+        timezone: { type: string }
+        locale: { type: string, maxLength: 10 }
+    LogoUpload:
+      type: object
+      required: [logo]
+      properties:
+        logo: { type: string, format: binary }
+    GuestLogoUpload:
+      allOf:
+        - $ref: '#/components/schemas/LogoUpload'
+        - type: object
+          required: [guest_session_key]
+          properties:
+            guest_session_key: { type: string, minLength: 32 }
+
