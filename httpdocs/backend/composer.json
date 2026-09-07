@@ -5,21 +5,41 @@
     "description": "The skeleton application for the Laravel framework.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Roman Kryvobk",
+            "email": "fast.kamaz@gmail.com"
+        }
+    ],
     "require": {
         "php": "^8.5",
+        "bezhansalleh/filament-shield": "^4.3",
+        "filament/filament": "^5.7",
+        "intervention/image-laravel": "^4.1",
         "laravel/framework": "^13.17",
         "laravel/passport": "^13.0",
-        "laravel/tinker": "^3.0"
+        "laravel/tinker": "^3.0",
+        "livewire/livewire": "^4.4",
+        "mobiledetect/mobiledetectlib": "^4.11",
+        "nwidart/laravel-modules": "^13.0",
+        "nyholm/psr7": "^1.8",
+        "openai-php/client": "^0.20.1",
+        "spatie/laravel-data": "^4.23",
+        "spatie/laravel-permission": "^8.3"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^4.4",
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.11",
         "laravel/boost": "^2.7",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
         "laravel/pint": "^1.27",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^12.5.12"
+        "phpmd/phpmd": "^2.5",
+        "phpunit/phpunit": "^12.5.12",
+        "squizlabs/php_codesniffer": "^4.0"
     },
     "autoload": {
         "files": [
@@ -55,11 +75,21 @@
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan filament:upgrade"
+        ],
+        "post-install-cmd": [
+            "if [ -f config/filament.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament configuration...'; php artisan vendor:publish --tag=filament-config --no-interaction; fi",
+            "if [ -f config/filament-shield.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament Shield configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament Shield configuration...'; php artisan vendor:publish --tag=filament-shield-config --no-interaction; fi",
+            "if [ -f config/livewire.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Livewire configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Livewire configuration...'; php artisan vendor:publish --tag=livewire:config --no-interaction; fi",
+            "@php artisan livewire:publish --assets"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
-            "@php artisan boost:update --ansi"
+            "if [ -f config/filament.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament configuration...'; php artisan vendor:publish --tag=filament-config --no-interaction; fi",
+            "if [ -f config/filament-shield.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Filament Shield configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Filament Shield configuration...'; php artisan vendor:publish --tag=filament-shield-config --no-interaction; fi",
+            "if [ -f config/livewire.php ]; then printf '\\033[32m%s\\033[0m\\n' 'Livewire configuration already exists.'; else printf '\\033[31m%s\\033[0m\\n' 'Publishing Livewire configuration...'; php artisan vendor:publish --tag=livewire:config --no-interaction; fi",
+            "@php artisan livewire:publish --assets"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
@@ -71,7 +101,25 @@
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
-        ]
+        ],
+        "boost:update": "@php artisan boost:update --ansi",
+        "pint:fix": "pint",
+        "pint:test": "pint --test --format agent",
+        "phpcs:check": "phpcs --standard=phpcs.xml --runtime-set ignore_warnings_on_exit 1 app routes config database tests Modules",
+        "phpcs:fix": "phpcbf --standard=phpcs.xml app routes config database tests Modules",
+        "phpstan:local": "phpstan --configuration=phpstan.local.neon --memory-limit=1G analyse && phpstan --configuration=phpstan.local.admin.neon --memory-limit=1G analyse",
+        "phpstan:local:storefront": "phpstan --configuration=phpstan.local.neon --memory-limit=1G analyse",
+        "phpstan:local:admin": "phpstan --configuration=phpstan.local.admin.neon --memory-limit=1G analyse",
+        "phpstan:local:tests": "phpstan --configuration=phpstan.local.tests.neon --memory-limit=1G analyse",
+        "phpstan:local:database": "phpstan --configuration=phpstan.local.database.neon --memory-limit=1G analyse",
+        "phpstan:local:all": "phpstan --configuration=phpstan.local.neon --memory-limit=1G analyse && phpstan --configuration=phpstan.local.admin.neon --memory-limit=1G analyse && phpstan --configuration=phpstan.local.tests.neon --memory-limit=1G analyse && phpstan --configuration=phpstan.local.database.neon --memory-limit=1G analyse",
+        "phpstan:production": "phpstan --configuration=phpstan.production.neon --memory-limit=1G analyse && phpstan --configuration=phpstan.production.admin.neon --memory-limit=1G analyse",
+        "phpmd:production": "@php -d error_reporting=\"E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED\" vendor/bin/phpmd app,routes,config,database,tests,Modules text phpmd.xml --ignore-errors-on-exit --ignore-violations-on-exit",
+        "psalm:local": "php -d memory_limit=1G /usr/local/bin/psalm",
+        "psalm:production": "php -d memory_limit=1G /usr/local/bin/psalm --config=psalm-production.xml && php -d memory_limit=1G /usr/local/bin/psalm --config=psalm-production.admin.xml",
+        "psalm:production:storefront": "php -d memory_limit=1G /usr/local/bin/psalm --config=psalm-production.xml",
+        "psalm:production:admin": "php -d memory_limit=1G /usr/local/bin/psalm --config=psalm-production.admin.xml",
+        "psalm:production:strict": "php -d memory_limit=1G /usr/local/bin/psalm --config=psalm-production.strict.xml"
     },
     "extra": {
         "laravel": {
@@ -84,7 +132,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "wikimedia/composer-merge-plugin": true
         }
     },
     "minimum-stability": "stable",

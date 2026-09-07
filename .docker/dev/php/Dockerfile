@@ -27,7 +27,8 @@ RUN install-php-extensions \
     zip \
     mysqli \
     pdo \
-    pdo_mysql \
+    pdo_pgsql \
+    pgsql \
     xdebug \
     xhprof \
     redis \

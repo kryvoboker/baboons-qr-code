@@ -1,7 +1,31 @@
-.idea
-/.db
+.idea/
+.DS_Store
 
-# Local environment files may contain credentials and must not be committed.
-**/.env
-**/.env.*
-!**/.env.example
+httpdocs/backend/.env
+httpdocs/backend/vendor/
+
+httpdocs/frontend/.env
+httpdocs/frontend/node_modules/
+httpdocs/frontend/.nuxt/
+httpdocs/frontend/.output/
+
+httpdocs/qr-renderer/node_modules/
+
+httpdocs/storage/framework/cache/data/*
+!httpdocs/storage/framework/cache/data/.gitkeep
+httpdocs/storage/framework/sessions/*
+!httpdocs/storage/framework/sessions/.gitkeep
+httpdocs/storage/framework/views/*
+!httpdocs/storage/framework/views/.gitkeep
+httpdocs/storage/logs/*
+!httpdocs/storage/logs/.gitkeep
+httpdocs/storage/app/public/images/qr-code/*
+!httpdocs/storage/app/public/images/qr-code/.gitkeep
+
+.docker/dev/env/*.local.env
+.docker/dev/env/*.secret.env
+.docker/dev/env/*
+.db/
+storage/debugbar/
+httpdocs/backend/.env.local
+login-credentials.md

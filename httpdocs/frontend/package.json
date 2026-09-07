@@ -1,24 +1,31 @@
 {
-  "name": "frontend",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
-  },
-  "dependencies": {
-    "@noble/hashes": "^2.4.0",
-    "@pinia/nuxt": "^1.0.2",
-    "@tailwindcss/vite": "^4.3.3",
-    "@noble/hashes": "^2.0.1",
-    "nuxt": "^4.5.2",
-    "pinia": "^4.0.3",
-    "pinia-plugin-persistedstate": "^4.7.1",
-    "tailwindcss": "^4.3.3",
-    "vue": "^3.5.42",
-    "vue-router": "^5.3.0"
-  }
+    "name": "baboons-qr-code-frontend",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "cross-env NODE_ENV=production nuxt build",
+        "dev": "nuxt dev --host 0.0.0.0",
+        "preview": "nuxt preview --host 0.0.0.0",
+        "postinstall": "nuxt prepare",
+        "ts:check": "biome check . && tsc --noEmit -p tsconfig.json",
+        "ts:fix": "biome check --write .",
+        "ts:format": "biome format --write .",
+        "ts:lint": "biome lint .",
+        "ts:typecheck": "tsc --noEmit -p tsconfig.json"
+    },
+    "dependencies": {
+        "flyonui": "^2.4.1",
+        "nuxt": "^4.5.2",
+        "qr-code-styling": "^1.9.2"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.5.7",
+        "@iconify-json/tabler": "^1.2.22",
+        "@iconify/tailwind4": "^1.2.3",
+        "@tailwindcss/vite": "^4.3.3",
+        "@types/node": "^26.4.1",
+        "cross-env": "^10.0.0",
+        "tailwindcss": "^4.3.3",
+        "typescript": "^7.0.0"
+    }
 }
