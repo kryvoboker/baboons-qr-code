@@ -1,4 +1,10 @@
+<script setup lang="ts">
+const { init } = useTheme();
+onMounted(init);
+</script>
+
 <template>
-  <NuxtRouteAnnouncer />
-  <NuxtPage />
+    <NuxtLayout>
+        <NuxtPage />
+    </NuxtLayout>
 </template>

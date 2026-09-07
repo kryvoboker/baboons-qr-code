@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\ForceJsonResponse;
+use App\Http\Middleware\VerifyBffSecret;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -42,6 +44,16 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 ? null
                 : route('login', ['redirect' => $request->fullUrl()]),
         );
+
+        $middleware->api(prepend: [ForceJsonResponse::class]);
+        $middleware->alias(['bff.secret' => VerifyBffSecret::class]);
+        $middleware->preventRequestForgery(except: [
+            'api/v1/auth/register',
+            'api/v1/auth/session',
+            'api/v1/auth/forgot-password',
+            'api/v1/auth/reset-password',
+            'api/v1/guest-assets/logo',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

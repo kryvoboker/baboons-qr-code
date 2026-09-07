@@ -1,37 +1,45 @@
 <script setup lang="ts">
-const route = useRoute()
-const auth = useAuthStore()
-const error = ref('')
+useHead({ title: 'Signing in' });
+
+const route = useRoute();
+const { finishCallback } = usePassportAuth();
+const error = ref('');
 
 onMounted(async () => {
-  const code = String(route.query.code || '')
-  const state = String(route.query.state || '')
-  const oauthError = String(route.query.error || '')
+    try {
+        const code = String(route.query.code || '');
+        const state = String(route.query.state || '');
+        if (!code || !state) throw new Error('Missing OAuth callback parameters.');
 
-  if (oauthError) {
-    error.value = `Авторизация отменена: ${oauthError}`
-    return
-  }
-  if (!code || !state) {
-    error.value = 'OAuth callback не содержит обязательных параметров.'
-    return
-  }
+        await finishCallback(code, state);
 
-  try {
-    await auth.completeLogin(code, state)
-    await navigateTo('/')
-  } catch (cause: unknown) {
-    error.value = cause instanceof Error ? cause.message : 'Не удалось завершить авторизацию.'
-  }
-})
+        const returnTo = sessionStorage.getItem('baboons-return-to');
+        const pendingDraft = sessionStorage.getItem('baboons-pending-draft');
+        sessionStorage.removeItem('baboons-return-to');
+
+        if (returnTo) {
+            await navigateTo(returnTo);
+        } else if (pendingDraft) {
+            await navigateTo('/#generator');
+        } else {
+            await navigateTo('/dashboard');
+        }
+    } catch (caught) {
+        error.value = caught instanceof Error ? caught.message : 'Authentication failed.';
+    }
+});
 </script>
 
 <template>
-  <main class="mx-auto min-h-screen max-w-md p-8">
-    <p v-if="!error">Завершаем вход…</p>
-    <div v-else class="space-y-4 rounded-xl border border-red-200 p-6">
-      <p class="text-red-700">{{ error }}</p>
-      <NuxtLink class="text-slate-700 underline" to="/login">Вернуться ко входу</NuxtLink>
-    </div>
-  </main>
+    <section class="mx-auto flex min-h-[60vh] max-w-lg items-center justify-center px-4">
+        <div class="text-center">
+            <span v-if="!error" class="loading loading-spinner loading-lg text-primary" />
+            <span v-else class="icon-[tabler--alert-triangle] text-error mx-auto size-10" />
+            <h1 class="mt-4 text-xl font-semibold">
+                {{ error ? 'Could not sign you in' : 'Finishing secure sign-in…' }}
+            </h1>
+            <p v-if="error" class="text-base-content/60 mt-2">{{ error }}</p>
+            <NuxtLink v-if="error" to="/auth/login" class="btn btn-primary mt-4">Try again</NuxtLink>
+        </div>
+    </section>
 </template>

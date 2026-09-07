@@ -65,7 +65,10 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'UTC'),
+    'date_format' => env('APP_DATE_FORMAT', 'Y-m-d'),
+    'time_format' => env('APP_TIME_FORMAT', 'H:i:s'),
+    'datetime_format' => env('APP_DATETIME_FORMAT', 'Y-m-d H:i:s'),
 
     /*
     |--------------------------------------------------------------------------

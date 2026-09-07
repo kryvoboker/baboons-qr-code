@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@import "flyonui/variants.css";
+
+@plugin "../../../node_modules/flyonui/index.js";
+
+@plugin "../../../node_modules/flyonui/theme/index.js" {
+    themes: light --default, black --prefersdark;
+}
+@plugin "@iconify/tailwind4";
+@source "../../../node_modules/flyonui/dist/index.js";
+@source "../../**/*.{vue,ts}";
+@source "/../../../../backend/resources/views/storefront/**/*.blade.php";

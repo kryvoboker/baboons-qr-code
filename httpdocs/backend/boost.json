@@ -12,6 +12,7 @@
         "laravel-best-practices",
         "testing-best-practices",
         "passport-development",
+        "livewire-development",
         "tailwindcss-development"
     ]
 }

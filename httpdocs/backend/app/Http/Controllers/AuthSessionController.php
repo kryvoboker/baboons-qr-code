@@ -13,7 +13,7 @@ final class AuthSessionController extends Controller
 {
     public function create(Request $request): View
     {
-        return view('auth.login', ['redirect' => $request->query('redirect')]);
+        return view('storefront.auth.login', ['redirect' => $request->query('redirect')]);
     }
 
     public function store(Request $request): RedirectResponse
