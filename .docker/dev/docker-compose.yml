@@ -19,6 +19,7 @@ services:
     env_file:
       - ../../.docker/dev/env/.env
       - ../../.docker/dev/env/.env.postgresql
+      - ../../.docker/dev/env/.env.qr-renderer
     volumes:
       - ../../httpdocs/backend:/var/www/html
       - ../../storage:/var/www/storage
@@ -31,6 +32,8 @@ services:
       - ALL # Removes Linux capabilities
     depends_on:
       dev-nuxt-postgresql:
+        condition: service_healthy
+      dev-nuxt-qr-renderer:
         condition: service_healthy
     networks:
       - dev-nuxt-net
@@ -91,6 +94,7 @@ services:
       - ../../httpdocs/backend:/var/www/html:ro
       - ../../storage:/var/www/storage:ro
       - ../../.docker/dev/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../httpdocs/frontend/public/images/social:/var/www/qr-social:ro
     security_opt:
       - no-new-privileges:true       # Disables setuid/setgid
       - apparmor=docker-default      # Limits syscalls and file system
@@ -144,11 +148,12 @@ services:
         GID: ${GID:-1000}
         UMASK: ${UMASK:-0002}
         USERNAME: node
-    image: dev-nuxt-nodejs:1.0-trixie-slim
+    image: dev-nuxt-nodejs:1.0-slim
     container_name: dev-nuxt-nodejs
     restart: unless-stopped
     env_file:
       - ../../.docker/dev/env/.env
+      - ../../.docker/dev/env/.env.qr-renderer
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.strateg-frontend-dev.rule=Host(`dev.dev-nuxt.com.ua`)"
@@ -165,9 +170,56 @@ services:
       - apparmor=docker-default      # Limits syscalls and file system
     cap_drop:
       - ALL # Removes Linux capabilities
+    depends_on:
+      dev-nuxt-qr-renderer:
+        condition: service_healthy
     networks:
       - traefik-network
       - dev-nuxt-net
+
+  dev-nuxt-qr-renderer:
+    build:
+      context: ${PWD}
+      dockerfile: .docker/dev/qr-renderer/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        UMASK: ${UMASK:-0002}
+    container_name: dev-nuxt-qr-renderer
+    image: dev-nuxt-qr-renderer:1.0-slim
+    restart: unless-stopped
+    env_file:
+      - ../../.docker/dev/env/.env.qr-renderer
+    volumes:
+      - ../../httpdocs/qr-renderer:/var/www/html:ro
+      - ../../storage/app/public:/shared/storage/app/public
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,nosuid
+      - /home/node/.npm:size=128m,nosuid
+    security_opt:
+      - no-new-privileges:true
+      - apparmor=docker-default
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3100/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    mem_limit: 512m
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      dev-nuxt-net:
+        aliases:
+          - qr-renderer
 
   dev-nuxt-redis:
     build:

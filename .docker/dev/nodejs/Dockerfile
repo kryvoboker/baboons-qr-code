@@ -76,6 +76,6 @@ EXPOSE 3000
 
 USER ${USERNAME}
 
-#RUN npm ci
+RUN npm ci
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

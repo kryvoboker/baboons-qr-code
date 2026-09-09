@@ -3,10 +3,10 @@ import nodeCanvas from 'canvas';
 import { JSDOM } from 'jsdom';
 
 const require = createRequire(import.meta.url);
-const QRCodeStyling = require('qr-code-styling/lib/qr-code-styling.common.js');
+const { QRCodeStyling } = require('qr-code-styling/lib/qr-code-styling.common.js');
 
 export type RenderFormat = 'png' | 'svg' | 'jpeg' | 'webp';
-type QrOptions = Record<string, unknown> & { image?: string };
+type QrOptions = Record<string, unknown> & { image?: string; imageOptions?: Record<string, unknown> };
 
 const clampNumber = (value: unknown, fallback: number, minimum: number, maximum: number): number => {
     const numeric = typeof value === 'number' ? value : Number(value);
@@ -48,16 +48,15 @@ const normalizeRenderOptions = (options: QrOptions): QrOptions => {
     };
 };
 
-export const renderQr = async (
-    options: QrOptions,
-    format: RenderFormat = 'png',
-): Promise<Buffer> => {
+export const renderQr = async (options: QrOptions, format: RenderFormat = 'png'): Promise<Buffer> => {
     const normalized = normalizeRenderOptions(options);
     const qrCode = new QRCodeStyling({
         width: 900,
         height: 900,
         margin: 24,
         ...normalized,
+        // Embed logos so previews and downloaded SVGs do not depend on Docker-only URLs.
+        imageOptions: { ...normalized.imageOptions, saveAsBlob: true },
         type: format === 'svg' ? 'svg' : 'canvas',
         jsdom: JSDOM,
         nodeCanvas,
