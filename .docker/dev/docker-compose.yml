@@ -124,7 +124,7 @@ services:
       timeout: 3s
       retries: 1
     ports:
-      - "3327:5432"
+      - "3351:5432"
     env_file:
       - ../../.docker/dev/env/.env
       - ../../.docker/dev/env/.env.postgresql

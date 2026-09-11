@@ -1,31 +1,16 @@
-.idea/
-.DS_Store
+.idea
+/.db
+slim.report.json
 
-httpdocs/backend/.env
-httpdocs/backend/vendor/
+# Local and environment-specific secrets.
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
 
-httpdocs/frontend/.env
-httpdocs/frontend/node_modules/
-httpdocs/frontend/.nuxt/
-httpdocs/frontend/.output/
-
-httpdocs/qr-renderer/node_modules/
-
-httpdocs/storage/framework/cache/data/*
-!httpdocs/storage/framework/cache/data/.gitkeep
-httpdocs/storage/framework/sessions/*
-!httpdocs/storage/framework/sessions/.gitkeep
-httpdocs/storage/framework/views/*
-!httpdocs/storage/framework/views/.gitkeep
-httpdocs/storage/logs/*
-!httpdocs/storage/logs/.gitkeep
-httpdocs/storage/app/public/images/qr-code/*
-!httpdocs/storage/app/public/images/qr-code/.gitkeep
-
-.docker/dev/env/*.local.env
-.docker/dev/env/*.secret.env
-.docker/dev/env/*
-.db/
-storage/debugbar/
-httpdocs/backend/.env.local
-login-credentials.md
+/.codex
+/.ai-factory
+/.ai-factory.json
+AGENTS.md
+/login-credentials.md
+/ai-chat.txt
