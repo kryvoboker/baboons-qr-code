@@ -8,9 +8,4 @@ slim.report.json
 !**/.env.example
 !**/.env.*.example
 
-/.codex
-/.ai-factory
-/.ai-factory.json
-AGENTS.md
 /login-credentials.md
-/ai-chat.txt
