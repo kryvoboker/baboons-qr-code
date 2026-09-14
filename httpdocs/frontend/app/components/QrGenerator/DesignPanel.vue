@@ -124,35 +124,99 @@ const uploadLogo = async (event: Event) => {
 
         <p v-if="uploadError" class="text-error mt-2 text-sm">{{ uploadError }}</p>
 
-        <div class="mt-4 grid gap-3 sm:grid-cols-2">
-            <label class="form-control">
-                <span class="label-text mb-1">Dots color</span>
-                <input v-model="draft.design.dotsOptions.color" type="color" class="input h-11 w-full p-1" />
-            </label>
-            <label class="form-control">
-                <span class="label-text mb-1">Background</span>
-                <input v-model="draft.design.backgroundOptions.color" type="color" class="input h-11 w-full p-1" />
-            </label>
-            <label class="form-control">
-                <span class="label-text mb-1">Module style</span>
-                <select v-model="draft.design.dotsOptions.type" class="select">
-                    <option>rounded</option>
-                    <option>dots</option>
-                    <option>classy</option>
-                    <option>classy-rounded</option>
-                    <option>square</option>
-                    <option>extra-rounded</option>
-                </select>
-            </label>
-            <label class="form-control">
-                <span class="label-text mb-1">Error correction</span>
-                <select v-model="draft.design.qrOptions.errorCorrectionLevel" class="select">
-                    <option>L</option>
-                    <option>M</option>
-                    <option>Q</option>
-                    <option>H</option>
-                </select>
-            </label>
+        <div class="mt-4 space-y-4">
+            <section aria-labelledby="qr-dots-heading">
+                <div class="mb-2">
+                    <h3 id="qr-dots-heading" class="font-medium">Dots</h3>
+                    <p class="text-base-content/50 text-xs">The shapes used for the QR code modules.</p>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <label class="form-control">
+                        <span class="label-text mb-1">Dots color</span>
+                        <input v-model="draft.design.dotsOptions.color" type="color" class="input h-11 w-full p-1" />
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text mb-1">Dots style</span>
+                        <select v-model="draft.design.dotsOptions.type" class="select">
+                            <option>rounded</option>
+                            <option>dots</option>
+                            <option>classy</option>
+                            <option>classy-rounded</option>
+                            <option>square</option>
+                            <option>extra-rounded</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section aria-labelledby="qr-finder-frames-heading" class="border-base-content/10 border-t pt-4">
+                <div class="mb-2">
+                    <h3 id="qr-finder-frames-heading" class="font-medium">Finder frames</h3>
+                    <p class="text-base-content/50 text-xs">The outer shapes around the three QR code markers.</p>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <label class="form-control">
+                        <span class="label-text mb-1">Frame color</span>
+                        <input v-model="draft.design.cornersSquareOptions.color" type="color" class="input h-11 w-full p-1" />
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text mb-1">Frame style</span>
+                        <select v-model="draft.design.cornersSquareOptions.type" class="select">
+                            <option>square</option>
+                            <option>dot</option>
+                            <option>extra-rounded</option>
+                            <option>rounded</option>
+                            <option>dots</option>
+                            <option>classy</option>
+                            <option>classy-rounded</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section aria-labelledby="qr-finder-centers-heading" class="border-base-content/10 border-t pt-4">
+                <div class="mb-2">
+                    <h3 id="qr-finder-centers-heading" class="font-medium">Finder centers</h3>
+                    <p class="text-base-content/50 text-xs">The inner shapes inside the three QR code markers.</p>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <label class="form-control">
+                        <span class="label-text mb-1">Center color</span>
+                        <input v-model="draft.design.cornersDotOptions.color" type="color" class="input h-11 w-full p-1" />
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text mb-1">Center style</span>
+                        <select v-model="draft.design.cornersDotOptions.type" class="select">
+                            <option>dot</option>
+                            <option>square</option>
+                            <option>rounded</option>
+                            <option>dots</option>
+                            <option>classy</option>
+                            <option>classy-rounded</option>
+                            <option>extra-rounded</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section aria-labelledby="qr-other-settings-heading" class="border-base-content/10 border-t pt-4">
+                <h3 id="qr-other-settings-heading" class="mb-2 font-medium">Other settings</h3>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <label class="form-control">
+                        <span class="label-text mb-1">Background</span>
+                        <input v-model="draft.design.backgroundOptions.color" type="color" class="input h-11 w-full p-1" />
+                    </label>
+                    <label class="form-control">
+                        <span class="label-text mb-1">Error correction</span>
+                        <select v-model="draft.design.qrOptions.errorCorrectionLevel" class="select">
+                            <option>L</option>
+                            <option>M</option>
+                            <option>Q</option>
+                            <option>H</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
         </div>
     </div>
 </template>
