@@ -5,15 +5,15 @@
 ## Backend
 
 ```bash
-docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm php artisan test --compact
-docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm vendor/bin/pint --format agent
+docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-php-fpm php artisan test --compact
+docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-php-fpm vendor/bin/pint --format agent
 ```
 
 ## Frontend
 
 ```bash
-docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-nodejs npm run ts:typecheck
-docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-nodejs npm run ts:check
+docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-nodejs npm run ts:typecheck
+docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-nodejs npm run ts:check
 ```
 
 `ts:typecheck` runs TypeScript only. `ts:check` also runs Biome and can report formatting/lint issues.
@@ -21,8 +21,8 @@ docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-nodejs npm run
 ## API smoke checks
 
 ```bash
-docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm php artisan route:list --except-vendor --path=api
-docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm php artisan passport:keys
+docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-php-fpm php artisan route:list --except-vendor --path=api
+docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-php-fpm php artisan passport:keys
 ```
 
 Use Chrome DevTools for browser checks:
@@ -42,4 +42,3 @@ Use an OpenAPI 3.1-compatible validator in CI or an API client. Keep `docs/opena
 - [Getting Started](getting-started.md) — local verification
 - [API Reference](api.md) — endpoint behavior
 - [OpenAPI](openapi.yaml) — machine-readable schema
-

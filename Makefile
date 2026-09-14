@@ -1,5 +1,5 @@
 DEV_DOCKER_COMPOSE_FILE=.docker/dev/docker-compose.yml
-PART_OF_CONTAINER_NAME=dev-nuxt
+PART_OF_CONTAINER_NAME=qr-code
 
 up-dev:
 	docker compose -f $(DEV_DOCKER_COMPOSE_FILE) up -d

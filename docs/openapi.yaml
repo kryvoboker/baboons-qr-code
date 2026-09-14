@@ -6,7 +6,7 @@ info:
     Laravel API used by the Nuxt server-side BFF. Browser clients should call
     the Nuxt /api/bff proxy; the BFF adds the internal secret and Bearer token.
 servers:
-  - url: http://dev.api.dev-nuxt.com.ua
+  - url: http://dev.api.qr-code.com
     description: Local development Laravel host
 tags:
   - name: Authentication
@@ -539,4 +539,3 @@ components:
           required: [guest_session_key]
           properties:
             guest_session_key: { type: string, minLength: 32 }
-

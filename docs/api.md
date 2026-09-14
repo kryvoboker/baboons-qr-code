@@ -7,7 +7,7 @@
 Browser code calls the Nuxt BFF:
 
 ```text
-http://dev.dev-nuxt.com.ua/api/bff
+http://dev.qr-code.com/api/bff
 ```
 
 The BFF calls Laravel internally. Direct Laravel API access is intended for trusted internal callers, not normal browser code.
@@ -85,4 +85,3 @@ The Nuxt server calls `/oauth/token); browser UI uses the authorization endpoint
 - [Authentication](authentication.md) — token lifecycle
 - [QR Codes and Storage](qr-codes.md) — QR payloads and files
 - [OpenAPI](openapi.yaml) — machine-readable contract
-

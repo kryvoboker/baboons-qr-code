@@ -12,7 +12,7 @@ Prerequisites: Docker Compose, GNU Make, and the external Docker networks used b
 
 ```bash
 make up-dev
-docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm php artisan about
+docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-php-fpm php artisan about
 ```
 
 Open the frontend through the host configured by the Traefik labels. The default development hosts are documented in [Getting Started](docs/getting-started.md).

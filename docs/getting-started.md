@@ -6,7 +6,7 @@
 
 - Docker Engine with Docker Compose.
 - GNU Make.
-- External Docker networks used by the Compose file: `traefik-network` and `dev-nuxt-net`.
+- External Docker networks used by the Compose file: `traefik-network` and `qr-code-net`.
 - Local development environment files in `.docker/dev/env/`.
 
 The application runs PHP, Composer, PostgreSQL, Redis, Nuxt, Nginx, and the QR renderer in containers.
@@ -27,15 +27,15 @@ docker compose -f .docker/dev/docker-compose.yml up -d
 ## Verify Laravel and Nuxt
 
 ```bash
-docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm php artisan about
-docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-php-fpm php artisan route:list
-docker compose -f .docker/dev/docker-compose.yml exec -T dev-nuxt-nodejs npm run ts:typecheck
+docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-php-fpm php artisan about
+docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-php-fpm php artisan route:list
+docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-nodejs npm run ts:typecheck
 ```
 
 The dev hosts are configured by Traefik labels:
 
-- Frontend: `http://dev.dev-nuxt.com.ua`
-- Laravel: `http://dev.api.dev-nuxt.com.ua`
+- Frontend: `http://dev.qr-code.com`
+- Laravel: `http://dev.api.qr-code.com`
 
 ## First workflow
 

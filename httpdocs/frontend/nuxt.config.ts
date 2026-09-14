@@ -8,17 +8,17 @@ export default defineNuxtConfig({
         plugins: [tailwindcss()],
     },
     runtimeConfig: {
-        backendInternalBase: process.env.NUXT_BACKEND_INTERNAL_BASE || 'http://dev-nuxt-nginx',
+        backendInternalBase: process.env.NUXT_BACKEND_INTERNAL_BASE || 'http://qr-code-nginx',
         qrRendererInternalBase: process.env.NUXT_QR_RENDERER_INTERNAL_BASE || 'http://qr-renderer:3100',
         qrRendererSharedSecret: process.env.NUXT_QR_RENDERER_SHARED_SECRET || '',
         authCookieSecure: process.env.NUXT_AUTH_COOKIE_SECURE === 'true',
         bffSharedSecret: process.env.NUXT_BFF_SHARED_SECRET || '',
         public: {
             appName: process.env.NUXT_PUBLIC_APP_NAME || 'Baboons QR-code',
-            backendBase: process.env.NUXT_PUBLIC_BACKEND_BASE || 'http://dev.api.dev-nuxt.com.ua',
+            backendBase: process.env.NUXT_PUBLIC_BACKEND_BASE || 'http://dev.api.qr-code.com',
             storageBase: process.env.NUXT_PUBLIC_STORAGE_BASE || 'http://localhost:8082',
             passportClientId: process.env.NUXT_PUBLIC_PASSPORT_CLIENT_ID || '',
-            passportRedirectUri: process.env.NUXT_PUBLIC_PASSPORT_REDIRECT_URI || 'http://dev.dev-nuxt.com.ua/auth/callback',
+            passportRedirectUri: process.env.NUXT_PUBLIC_PASSPORT_REDIRECT_URI || 'http://dev.qr-code.com/auth/callback',
         },
     },
     routeRules: {

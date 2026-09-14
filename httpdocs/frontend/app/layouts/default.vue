@@ -1,7 +1,7 @@
 <template>
-    <div class="bg-base-100 text-base-content min-h-screen">
+    <div class="wrapper bg-base-100 text-base-content min-h-screen">
         <AppHeader />
-        <main><slot /></main>
+        <main class="main"><slot /></main>
         <AppFooter />
     </div>
 </template>

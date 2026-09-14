@@ -8,12 +8,12 @@ The development Compose file is `.docker/dev/docker-compose.yml`.
 
 | Service | Role |
 |---|---|
-| `dev-nuxt-php-fpm` | Laravel PHP runtime |
-| `dev-nuxt-nginx` | Laravel HTTP entrypoint |
-| `dev-nuxt-nodejs` | Nuxt development server and BFF |
-| `dev-nuxt-postgresql` | PostgreSQL database |
-| `dev-nuxt-redis` | Redis service |
-| `dev-nuxt-cron` | Scheduled Laravel commands |
+| `qr-code-php-fpm` | Laravel PHP runtime |
+| `qr-code-nginx` | Laravel HTTP entrypoint |
+| `qr-code-nodejs` | Nuxt development server and BFF |
+| `qr-code-postgresql` | PostgreSQL database |
+| `qr-code-redis` | Redis service |
+| `qr-code-cron` | Scheduled Laravel commands |
 
 ## Important variables
 
@@ -32,7 +32,7 @@ Never commit actual values from local env files.
 | `NUXT_BFF_SHARED_SECRET` | Nuxt | Sends the same BFF secret internally |
 | `NUXT_PUBLIC_PASSPORT_CLIENT_ID` | Nuxt | Public Passport client UUID |
 | `NUXT_PUBLIC_PASSPORT_REDIRECT_URI` | Nuxt | Exact OAuth callback URI |
-| `NUXT_BACKEND_INTERNAL_BASE` | Nuxt | Internal Laravel URL, usually `http://dev-nuxt-nginx` |
+| `NUXT_BACKEND_INTERNAL_BASE` | Nuxt | Internal Laravel URL, usually `http://qr-code-nginx` |
 | `NUXT_PUBLIC_BACKEND_BASE` | Browser/Nuxt | Public Laravel URL used for OAuth navigation |
 | `NUXT_AUTH_COOKIE_SECURE` | Nuxt | Set `true` when using HTTPS |
 | `QR_RENDERER_SHARED_SECRET` | Laravel/renderer | Authenticates renderer requests |

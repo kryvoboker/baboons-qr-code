@@ -1,12 +1,50 @@
-@import "tailwindcss";
+@layer theme, base, app, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+
 @import "flyonui/variants.css";
 
-@plugin "../../../node_modules/flyonui/index.js";
-
-@plugin "../../../node_modules/flyonui/theme/index.js" {
+@plugin "flyonui" {
+    root: "#__nuxt";
     themes: light --default, black --prefersdark;
+    logs: true;
 }
+
+@plugin "../../../node_modules/flyonui/index.js";
+@custom-variant dark (&:where([data-theme=black], [data-theme=black] *));
 @plugin "@iconify/tailwind4";
 @source "../../../node_modules/flyonui/dist/index.js";
 @source "../../**/*.{vue,ts}";
 @source "/../../../../backend/resources/views/storefront/**/*.blade.php";
+
+@layer utilities {
+    .container {
+        @apply max-w-480 px-2 xl:px-10 mx-auto my-0;
+    }
+
+    .container .container {
+        @apply max-w-none px-0;
+    }
+}
+
+@layer app {
+    /* Disable animation if user disable it in his device */
+    *, ::after, ::before, ::backdrop, ::file-selector-button {
+        @apply motion-reduce:animate-none! motion-reduce:transition-none! motion-reduce:scroll-auto!;
+    }
+
+    html,
+    body {
+        @apply h-full;
+    }
+
+    #__nuxt > .wrapper {
+        @apply flex flex-col min-h-full;
+    }
+
+    .main {
+        @apply shrink grow basis-auto relative;
+    }
+}

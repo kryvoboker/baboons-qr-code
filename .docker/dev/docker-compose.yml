@@ -1,7 +1,7 @@
-name: "dev-nuxt"
+name: "qr-code"
 
 services:
-  dev-nuxt-php-fpm:
+  qr-code-php-fpm:
     build:
       context: ${PWD}
       dockerfile: .docker/dev/php/Dockerfile
@@ -11,8 +11,8 @@ services:
         GID: ${GID:-1000}
         UMASK: ${UMASK:-0002}
         USERNAME: www-data
-    image: dev-nuxt-php-fpm:1.0
-    container_name: dev-nuxt-php-fpm
+    image: qr-code-php-fpm:1.0
+    container_name: qr-code-php-fpm
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -31,14 +31,14 @@ services:
     cap_drop:
       - ALL # Removes Linux capabilities
     depends_on:
-      dev-nuxt-postgresql:
+      qr-code-postgresql:
         condition: service_healthy
-      dev-nuxt-qr-renderer:
+      qr-code-qr-renderer:
         condition: service_healthy
     networks:
-      - dev-nuxt-net
+      - qr-code-net
 
-  dev-nuxt-cron:
+  qr-code-cron:
     build:
       context: ${PWD}
       dockerfile: .docker/dev/cron/Dockerfile
@@ -48,8 +48,8 @@ services:
         GID: ${GID:-1000}
         UMASK: ${UMASK:-0002}
         USERNAME: www-data
-    image: dev-nuxt-cron:1.0-alpine
-    container_name: dev-nuxt-cron
+    image: qr-code-cron:1.0-alpine
+    container_name: qr-code-cron
     restart: unless-stopped
     env_file:
       - ../../.docker/dev/env/.env
@@ -64,14 +64,14 @@ services:
     cap_drop:
       - ALL # Removes Linux capabilities
     depends_on:
-      dev-nuxt-php-fpm:
+      qr-code-php-fpm:
         condition: service_started
-      dev-nuxt-postgresql:
+      qr-code-postgresql:
         condition: service_healthy
     networks:
-      - dev-nuxt-net
+      - qr-code-net
 
-  dev-nuxt-nginx:
+  qr-code-nginx:
     build:
       context: ${PWD}
       dockerfile: .docker/dev/nginx/Dockerfile
@@ -80,16 +80,16 @@ services:
         GID: ${GID:-1000}
         UMASK: ${UMASK:-0002}
         USERNAME: www-data
-    image: dev-nuxt-nginx:1.0-alpine-slim
-    container_name: dev-nuxt-nginx
+    image: qr-code-nginx:1.0-alpine-slim
+    container_name: qr-code-nginx
     restart: unless-stopped
     env_file:
       - ../../.docker/dev/env/.env
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dev-nuxt-nginx.rule=Host(`dev.api.dev-nuxt.com.ua`)"
-      - "traefik.http.routers.dev-nuxt-nginx.entrypoints=web"
-      - "traefik.http.services.dev-nuxt-nginx.loadbalancer.server.port=80"
+      - "traefik.http.routers.qr-code-nginx.rule=Host(`dev.api.qr-code.com`)"
+      - "traefik.http.routers.qr-code-nginx.entrypoints=web"
+      - "traefik.http.services.qr-code-nginx.loadbalancer.server.port=80"
     volumes:
       - ../../httpdocs/backend:/var/www/html:ro
       - ../../storage:/var/www/storage:ro
@@ -101,12 +101,50 @@ services:
     cap_drop:
       - ALL # Removes Linux capabilities
     depends_on:
-      - dev-nuxt-php-fpm
+      - qr-code-php-fpm
     networks:
       - traefik-network
-      - dev-nuxt-net
+      - qr-code-net
 
-  dev-nuxt-postgresql:
+  qr-code-nodejs:
+    build:
+      context: ${PWD}
+      dockerfile: .docker/dev/nodejs/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        UMASK: ${UMASK:-0002}
+        USERNAME: node
+    image: qr-code-nodejs:1.0-slim
+    container_name: qr-code-nodejs
+    restart: unless-stopped
+    env_file:
+      - ../../.docker/dev/env/.env
+      - ../../.docker/dev/env/.env.qr-renderer
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.strateg-frontend-dev.rule=Host(`dev.qr-code.com`)"
+      - "traefik.http.routers.strateg-frontend-dev.entrypoints=web"
+      - "traefik.http.services.strateg-frontend-dev.loadbalancer.server.port=3000"
+    ports:
+      - "3000:3000"  # Nuxt
+      - "9229:9229"  # Node inspector
+    volumes:
+      - ../../httpdocs/frontend:/var/www/html
+      - ../../storage:/var/www/storage
+    security_opt:
+      - no-new-privileges:true       # Disables setuid/setgid
+      - apparmor=docker-default      # Limits syscalls and file system
+    cap_drop:
+      - ALL # Removes Linux capabilities
+    depends_on:
+      qr-code-qr-renderer:
+        condition: service_healthy
+    networks:
+      - traefik-network
+      - qr-code-net
+
+  qr-code-postgresql:
     build:
       context: ${PWD}
       dockerfile: .docker/dev/postgresql/Dockerfile
@@ -115,8 +153,8 @@ services:
         GID: ${GID:-1000}
         UMASK: ${UMASK:-0002}
         USERNAME: postgres
-    image: dev-nuxt-postgresql:1.0-alpine
-    container_name: dev-nuxt-postgresql
+    image: qr-code-postgresql:1.0-alpine
+    container_name: qr-code-postgresql
     restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready --username=$${POSTGRES_SIMPLE_USER} --dbname=$${POSTGRES_DB}" ]
@@ -137,47 +175,9 @@ services:
     cap_drop:
       - ALL # Removes Linux capabilities
     networks:
-      - dev-nuxt-net
+      - qr-code-net
 
-  dev-nuxt-nodejs:
-    build:
-      context: ${PWD}
-      dockerfile: .docker/dev/nodejs/Dockerfile
-      args:
-        UID: ${UID:-1000}
-        GID: ${GID:-1000}
-        UMASK: ${UMASK:-0002}
-        USERNAME: node
-    image: dev-nuxt-nodejs:1.0-slim
-    container_name: dev-nuxt-nodejs
-    restart: unless-stopped
-    env_file:
-      - ../../.docker/dev/env/.env
-      - ../../.docker/dev/env/.env.qr-renderer
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.strateg-frontend-dev.rule=Host(`dev.dev-nuxt.com.ua`)"
-      - "traefik.http.routers.strateg-frontend-dev.entrypoints=web"
-      - "traefik.http.services.strateg-frontend-dev.loadbalancer.server.port=3000"
-    ports:
-      - "3000:3000"  # Nuxt
-      - "9229:9229"  # Node inspector
-    volumes:
-      - ../../httpdocs/frontend:/var/www/html
-      - ../../storage:/var/www/storage
-    security_opt:
-      - no-new-privileges:true       # Disables setuid/setgid
-      - apparmor=docker-default      # Limits syscalls and file system
-    cap_drop:
-      - ALL # Removes Linux capabilities
-    depends_on:
-      dev-nuxt-qr-renderer:
-        condition: service_healthy
-    networks:
-      - traefik-network
-      - dev-nuxt-net
-
-  dev-nuxt-qr-renderer:
+  qr-code-qr-renderer:
     build:
       context: ${PWD}
       dockerfile: .docker/dev/qr-renderer/Dockerfile
@@ -185,8 +185,8 @@ services:
         UID: ${UID:-1000}
         GID: ${GID:-1000}
         UMASK: ${UMASK:-0002}
-    container_name: dev-nuxt-qr-renderer
-    image: dev-nuxt-qr-renderer:1.0-slim
+    container_name: qr-code-qr-renderer
+    image: qr-code-qr-renderer:1.0-slim
     restart: unless-stopped
     env_file:
       - ../../.docker/dev/env/.env.qr-renderer
@@ -217,11 +217,11 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      dev-nuxt-net:
+      qr-code-net:
         aliases:
           - qr-renderer
 
-  dev-nuxt-redis:
+  qr-code-redis:
     build:
       context: ${PWD}
       dockerfile: .docker/dev/redis/Dockerfile
@@ -230,8 +230,8 @@ services:
         GID: ${GID:-1000}
         UMASK: ${UMASK:-0002}
         USERNAME: redis
-    image: dev-nuxt-redis:1.0-alpine
-    container_name: dev-nuxt-redis
+    image: qr-code-redis:1.0-alpine
+    container_name: qr-code-redis
     restart: unless-stopped
     ports:
       - "42608:6379"
@@ -249,14 +249,14 @@ services:
     cap_drop:
       - ALL # Removes Linux capabilities
     networks:
-      - dev-nuxt-net
+      - qr-code-net
 
 networks:
   traefik-network:
     name: traefik-network
     driver: bridge
     external: true
-  dev-nuxt-net:
-    name: dev-nuxt-net
+  qr-code-net:
+    name: qr-code-net
     driver: bridge
     external: true

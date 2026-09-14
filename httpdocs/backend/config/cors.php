@@ -7,7 +7,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => array_filter(
-        array_map('trim', explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'http://dev.dev-nuxt.com.ua'))),
+        array_map('trim', explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'http://dev.qr-code.com'))),
     ),
 
     'allowed_origins_patterns' => [],
