@@ -13,14 +13,18 @@ export type QrKind =
     | 'event'
     | 'file';
 
+export type QrDotStyle = 'dots' | 'rounded' | 'classy' | 'classy-rounded' | 'square' | 'extra-rounded';
+export type QrCornerDotStyle = 'dot' | 'square' | QrDotStyle;
+export type QrCornerSquareStyle = 'dot' | 'square' | 'extra-rounded' | QrDotStyle;
+
 export interface QrDesign {
     width: number;
     height: number;
     type: 'svg' | 'canvas';
     margin: number;
-    dotsOptions: { color: string; type: string };
-    cornersSquareOptions: { color: string; type: string };
-    cornersDotOptions: { color: string; type: string };
+    dotsOptions: { color: string; type: QrDotStyle };
+    cornersSquareOptions: { color: string; type: QrCornerSquareStyle };
+    cornersDotOptions: { color: string; type: QrCornerDotStyle };
     backgroundOptions: { color: string };
     image?: string;
     imageOptions: { crossOrigin: 'anonymous'; margin: number; hideBackgroundDots: boolean };

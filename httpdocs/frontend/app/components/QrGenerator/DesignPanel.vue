@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { designPresets, socialLogos } from '~/data/qr-presets';
-import type { QrDraft, QrDesign } from '~/types/qr';
+import type { QrDraft } from '~/types/qr';
 
 const draft = defineModel<QrDraft>({ required: true });
 const storageBase = useRuntimeConfig().public.storageBase;
@@ -20,8 +20,18 @@ const guestSessionKey = () => {
     return key;
 };
 
-const setPreset = (design: Partial<QrDesign>) => {
-    draft.value.design = { ...draft.value.design, ...structuredClone(design) } as QrDesign;
+const setPreset = (shape: (typeof designPresets)[number]['shape']) => {
+    draft.value.design.dotsOptions.type = shape.dots;
+    draft.value.design.cornersSquareOptions.type = shape.cornersSquare;
+    draft.value.design.cornersDotOptions.type = shape.cornersDot;
+};
+
+const isPresetActive = (shape: (typeof designPresets)[number]['shape']): boolean => {
+    return (
+        draft.value.design.dotsOptions.type === shape.dots &&
+        draft.value.design.cornersSquareOptions.type === shape.cornersSquare &&
+        draft.value.design.cornersDotOptions.type === shape.cornersDot
+    );
 };
 
 const setLogo = (path: string) => {
@@ -67,7 +77,9 @@ const uploadLogo = async (event: Event) => {
                 :key="preset.id"
                 type="button"
                 class="border-base-content/10 hover:border-primary rounded-box border p-3 text-start"
-                @click="setPreset(preset.design)"
+                :class="isPresetActive(preset.shape) ? 'border-primary bg-primary/5' : ''"
+                :aria-pressed="isPresetActive(preset.shape)"
+                @click="setPreset(preset.shape)"
             >
                 <span class="block text-sm font-medium">{{ preset.name }}</span>
                 <span class="text-base-content/50 text-xs">{{ preset.description }}</span>
@@ -122,7 +134,7 @@ const uploadLogo = async (event: Event) => {
                 <input v-model="draft.design.backgroundOptions.color" type="color" class="input h-11 w-full p-1" />
             </label>
             <label class="form-control">
-                <span class="label-text mb-1">Dots style</span>
+                <span class="label-text mb-1">Module style</span>
                 <select v-model="draft.design.dotsOptions.type" class="select">
                     <option>rounded</option>
                     <option>dots</option>

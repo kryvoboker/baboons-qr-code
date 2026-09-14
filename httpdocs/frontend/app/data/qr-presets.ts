@@ -1,4 +1,4 @@
-import type { QrDesign, QrKind } from '~/types/qr';
+import type { QrDesign, QrDotStyle, QrCornerDotStyle, QrCornerSquareStyle, QrKind } from '~/types/qr';
 
 export const qrKinds: Array<{ kind: QrKind; label: string; description: string; icon: string; dynamicFriendly: boolean }> = [
     { kind: 'url', label: 'Website', description: 'Open any link', icon: 'icon-[tabler--link]', dynamicFriendly: true },
@@ -28,11 +28,36 @@ export const defaultDesign: QrDesign = {
     qrOptions: { errorCorrectionLevel: 'H' },
 };
 
-export const designPresets: Array<{ id: string; name: string; description: string; design: Partial<QrDesign> }> = [
-    { id: 'clean', name: 'Clean', description: 'Rounded black on white', design: {} },
-    { id: 'soft', name: 'Soft', description: 'Dots with roomy corners', design: { dotsOptions: { color: '#334155', type: 'dots' } } },
-    { id: 'night', name: 'Night', description: 'White code on dark', design: { dotsOptions: { color: '#ffffff', type: 'rounded' }, backgroundOptions: { color: '#111827' } } },
-    { id: 'violet', name: 'Violet', description: 'Brand-friendly rounded style', design: { dotsOptions: { color: '#6d28d9', type: 'rounded' }, cornersSquareOptions: { color: '#4c1d95', type: 'extra-rounded' } } },
+export const designPresets: Array<{
+    id: string;
+    name: string;
+    description: string;
+    shape: { dots: QrDotStyle; cornersSquare: QrCornerSquareStyle; cornersDot: QrCornerDotStyle };
+}> = [
+    {
+        id: 'dots',
+        name: 'Dots',
+        description: 'Circular modules with rounded finder marks',
+        shape: { dots: 'dots', cornersSquare: 'extra-rounded', cornersDot: 'dot' },
+    },
+    {
+        id: 'square',
+        name: 'Square',
+        description: 'Classic square modules and finder marks',
+        shape: { dots: 'square', cornersSquare: 'square', cornersDot: 'square' },
+    },
+    {
+        id: 'rounded',
+        name: 'Rounded',
+        description: 'Soft rounded modules and finder marks',
+        shape: { dots: 'rounded', cornersSquare: 'extra-rounded', cornersDot: 'dot' },
+    },
+    {
+        id: 'classy',
+        name: 'Classy',
+        description: 'Decorative modules with crisp finder marks',
+        shape: { dots: 'classy', cornersSquare: 'square', cornersDot: 'square' },
+    },
 ];
 
 export const socialLogos = [
