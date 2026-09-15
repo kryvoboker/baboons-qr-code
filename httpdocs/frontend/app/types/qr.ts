@@ -1,4 +1,5 @@
 export type QrMode = 'static' | 'dynamic';
+export type QrImageFormat = 'svg' | 'png' | 'jpg';
 export type QrKind =
     | 'url'
     | 'text'

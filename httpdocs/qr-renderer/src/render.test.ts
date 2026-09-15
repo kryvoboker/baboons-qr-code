@@ -11,6 +11,12 @@ test('renders a PNG with the requested dimensions', async () => {
     assert.equal(result.readUInt32BE(20), 256);
 });
 
+test('renders a JPEG with the requested dimensions', async () => {
+    const result = await renderQr({ data: 'https://example.com', width: 320, height: 320 }, 'jpeg');
+
+    assert.deepEqual(result.subarray(0, 2), Buffer.from([0xff, 0xd8]));
+});
+
 test('renders SVG markup containing the QR pattern', async () => {
     const result = await renderQr({ data: 'https://example.com' }, 'svg');
 

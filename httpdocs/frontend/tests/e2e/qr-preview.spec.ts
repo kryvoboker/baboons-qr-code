@@ -34,6 +34,74 @@ test('renders the QR preview as SVG without browser errors', async ({ page }) =>
     expect(pageErrors).toEqual([]);
 });
 
+test('applies the selected one-pixel size and image format to preview rendering', async ({ page }) => {
+    let previewRequest: { format: string; width: number; height: number } | undefined;
+    let previewResponse: { status: number; contentType: string | undefined } | undefined;
+
+    page.on('request', (request) => {
+        if (new URL(request.url()).pathname === '/api/renderer/preview') {
+            const body = request.postDataJSON() as {
+                format: string;
+                options: { width: number; height: number };
+            };
+            previewRequest = {
+                format: body.format,
+                width: body.options.width,
+                height: body.options.height,
+            };
+        }
+    });
+    page.on('response', (response) => {
+        if (new URL(response.url()).pathname === '/api/renderer/preview') {
+            previewResponse = {
+                status: response.status(),
+                contentType: response.headers()['content-type'],
+            };
+        }
+    });
+
+    await page.goto('/');
+    await expect(page.getByRole('img', { name: 'QR code preview' })).toBeVisible();
+    await expect(page.getByText('720 px')).toBeVisible();
+
+    await page.getByRole('slider', { name: 'QR code image size' }).press('ArrowRight');
+    await expect(page.getByText('721 px')).toBeVisible();
+    await page.getByRole('radio', { name: 'PNG' }).check();
+
+    await expect.poll(() => previewRequest).toEqual({ format: 'png', width: 721, height: 721 });
+    await expect.poll(() => previewResponse?.contentType).toContain('image/png');
+    expect(previewResponse?.status).toBe(200);
+
+    await page.getByRole('radio', { name: 'JPG' }).check();
+    await expect.poll(() => previewRequest?.format).toBe('jpg');
+    await expect.poll(() => previewResponse?.contentType).toContain('image/jpeg');
+    expect(previewResponse?.status).toBe(200);
+});
+
+test('downloads the selected image format with the matching file extension', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('img', { name: 'QR code preview' })).toBeVisible();
+
+    for (const format of ['svg', 'png', 'jpg'] as const) {
+        await page.getByRole('radio', { name: format.toUpperCase() }).check();
+
+        const downloadPromise = page.waitForEvent('download');
+        const responsePromise = page.waitForResponse(
+            (response) => new URL(response.url()).pathname === '/api/renderer/download',
+        );
+
+        await page.getByRole('button', { name: 'Download' }).click();
+
+        const [download, response] = await Promise.all([downloadPromise, responsePromise]);
+
+        expect(download.suggestedFilename()).toBe(`My QR code.${format}`);
+        expect(response.status()).toBe(200);
+        expect(response.headers()['content-type']).toContain(
+            format === 'svg' ? 'image/svg+xml' : format === 'jpg' ? 'image/jpeg' : 'image/png',
+        );
+    }
+});
+
 test('applies the selected theme and restores it after reload', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('/');

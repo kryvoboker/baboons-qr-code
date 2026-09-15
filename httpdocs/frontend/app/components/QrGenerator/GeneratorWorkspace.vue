@@ -3,11 +3,12 @@ import type { QrDraft } from '~/types/qr';
 import { getSessionStorageJson, removeSessionStorageItem, setSessionStorageJson } from '~/utils/helpers';
 import { isPendingQrTemplate, isQrDraft, type PendingQrTemplate } from '~/utils/qr-validation';
 
-const { draft, previewUrl, previewPending, setKind, syncData, preview, queuePreview } = useQrGenerator();
+const { draft, previewUrl, previewPending, imageFormat, setKind, syncData, preview, queuePreview } = useQrGenerator();
 const savePending = ref(false);
 const saveError = ref('');
 
 watch(draft, queuePreview, { deep: true });
+watch(imageFormat, queuePreview);
 onMounted(() => {
     const parsedDraft = getSessionStorageJson<QrDraft>('baboons-pending-draft', isQrDraft);
     if (parsedDraft) {
@@ -100,7 +101,7 @@ const download = async () => {
         method: 'POST',
         body: {
             options: { ...draft.value.design, data: draft.value.data },
-            format: 'png',
+            format: imageFormat.value,
         },
         responseType: 'blob',
     });
@@ -108,7 +109,7 @@ const download = async () => {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `${draft.value.name || 'qr-code'}.png`;
+    anchor.download = `${draft.value.name || 'qr-code'}.${imageFormat.value}`;
     anchor.click();
     URL.revokeObjectURL(url);
 };
@@ -147,7 +148,10 @@ const download = async () => {
                     <QrGeneratorPreviewCard
                         :draft="draft"
                         :preview-url="previewUrl"
+                        :image-format="imageFormat"
                         :pending="previewPending || savePending"
+                        @update:image-size="(size: number) => { draft.design.width = size; draft.design.height = size; }"
+                        @update:image-format="imageFormat = $event"
                         @refresh="preview"
                         @save="save"
                         @download="download"

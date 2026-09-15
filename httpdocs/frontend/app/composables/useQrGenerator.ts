@@ -1,5 +1,5 @@
 import { defaultDesign } from '~/data/qr-presets';
-import type { QrDraft, QrKind } from '~/types/qr';
+import type { QrDraft, QrImageFormat, QrKind } from '~/types/qr';
 import { buildQrData, defaultFieldsFor, dynamicKinds } from '~/utils/qr-content';
 
 const createDraft = (): QrDraft => {
@@ -20,6 +20,7 @@ export const useQrGenerator = () => {
     const draft = useState<QrDraft>('qr-draft', createDraft);
     const previewUrl = useState<string>('qr-preview-url', () => '');
     const previewPending = useState<boolean>('qr-preview-pending', () => false);
+    const imageFormat = useState<QrImageFormat>('qr-image-format', () => 'svg');
     let timer: ReturnType<typeof setTimeout> | undefined;
 
     const syncData = () => {
@@ -50,6 +51,7 @@ export const useQrGenerator = () => {
                         ...draft.value.design,
                         data: draft.value.mode === 'dynamic' ? 'https://q.example/r/demo' : draft.value.data,
                     },
+                    format: imageFormat.value,
                 },
                 responseType: 'blob',
             });
@@ -71,6 +73,7 @@ export const useQrGenerator = () => {
         draft,
         previewUrl,
         previewPending,
+        imageFormat,
         setKind,
         syncData,
         preview,
