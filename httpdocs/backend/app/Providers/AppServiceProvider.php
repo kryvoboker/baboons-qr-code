@@ -6,9 +6,12 @@ namespace App\Providers;
 
 use App\Contracts\BillingGateway;
 use App\Models\Passport\Client;
+use App\Models\User;
 use App\Services\Billing\DemoBillingGateway;
 use Carbon\CarbonInterval;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -57,6 +60,24 @@ final class AppServiceProvider extends ServiceProvider
             return rtrim((string) config('baboons.frontend_url'), '/')
                 .'/auth/reset-password?token='.urlencode($token)
                 .'&email='.urlencode((string) $user->getEmailForPasswordReset());
+        });
+
+        VerifyEmail::createUrlUsing(static function (User $user): string {
+            $original_root_url = URL::to('/');
+            URL::forceRootUrl((string) config('baboons.api_public_url'));
+
+            try {
+                return URL::temporarySignedRoute(
+                    'verification.verify',
+                    now()->addMinutes((int) config('auth.verification.expire', 60)),
+                    [
+                        'id' => $user->getKey(),
+                        'hash' => sha1($user->getEmailForVerification()),
+                    ],
+                );
+            } finally {
+                URL::forceRootUrl($original_root_url);
+            }
         });
     }
 }

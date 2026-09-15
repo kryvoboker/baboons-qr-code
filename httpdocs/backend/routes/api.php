@@ -25,7 +25,7 @@ Route::prefix('v1')->middleware('bff.secret')->group(function (): void {
     Route::get('/billing/plans', [BillingController::class, 'plans']);
     Route::post('/guest-assets/logo', [AssetController::class, 'logo']);
 
-    Route::middleware('auth:api')->group(function (): void {
+    Route::middleware(['auth:api', 'verified'])->group(function (): void {
         Route::get('/auth/user', [AuthController::class, 'user']);
         Route::delete('/auth/token', [AuthController::class, 'revokeToken']);
         Route::get('/dashboard', [DashboardController::class, 'show']);
@@ -46,7 +46,7 @@ Route::prefix('v1')->middleware('bff.secret')->group(function (): void {
 });
 
 // Keep the original API endpoints available for existing clients.
-Route::middleware('auth:api')->group(function (): void {
+Route::middleware(['auth:api', 'verified'])->group(function (): void {
     Route::get('/auth/me', [LegacyAuthController::class, 'me']);
     Route::post('/auth/logout', [LegacyAuthController::class, 'logout']);
     Route::get('/user', static fn (Request $request) => $request->user());

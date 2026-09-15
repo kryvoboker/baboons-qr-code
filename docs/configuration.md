@@ -22,6 +22,7 @@ Never commit actual values from local env files.
 | Variable | Consumer | Purpose |
 |---|---|---|
 | `APP_URL` | Laravel | API and dynamic redirect base URL |
+| `API_PUBLIC_URL` | Laravel | Public API origin used when generating signed email-verification links; defaults to `NUXT_PUBLIC_BACKEND_BASE`, then `APP_URL` |
 | `FRONTEND_URL` | Laravel | Nuxt origin used in reset links and OAuth |
 | `NEW_STORAGE_PATH` | Laravel | Mounted Laravel storage path |
 | `DB_CONNECTION` | Laravel | `pgsql` in current dev stack |

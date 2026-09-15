@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
+    'api_public_url' => env('API_PUBLIC_URL', env('NUXT_PUBLIC_BACKEND_BASE', env('APP_URL', 'http://localhost'))),
     'storage_public_url' => env('STORAGE_PUBLIC_URL', 'http://localhost:8082'),
     'bff_secret' => env('BFF_SHARED_SECRET'),
     'qr_renderer_url' => env('QR_RENDERER_URL', 'http://qr-renderer:3100'),

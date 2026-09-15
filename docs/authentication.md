@@ -28,6 +28,18 @@ Nuxt /auth/login
 
 The password is entered on Laravel's login page because that is where Passport's authorization server owns the web session.
 
+The Passport client used by Nuxt must be a public Authorization Code client: it has no client secret, supports PKCE, and its registered redirect URI must exactly match `NUXT_PUBLIC_PASSPORT_REDIRECT_URI` (including scheme, host, path, and trailing slash). Keep the client ID public; never add a client secret to Nuxt runtime config.
+
+Registration is sent through the Nuxt BFF to `POST /api/v1/auth/register`. Laravel requires a name, a valid unique email, and a password of at least 10 characters with a matching confirmation. Validation failures return HTTP `422`; Nuxt forwards only the `name`, `email`, and `password` field messages to the form. Other backend failures are replaced with a generic service-unavailable response so internal exception details are not returned to the browser.
+
+## Email verification
+
+`App\Models\User` implements Laravel's `MustVerifyEmail` contract. After creating a user, the registration endpoint dispatches Laravel's `Registered` event, which sends the built-in verification notification. The users table already has `email_verified_at`.
+
+The verification URL is signed, expires, and requires the user to authenticate in Laravel's web session before it is fulfilled. If the session has expired, Laravel sends the browser to its login form and returns to the same signed verification URL after successful login. The login redirect allowlist permits only the OAuth authorization route and the exact email-verification URL shape. A successful verification returns to Nuxt's `/auth/verify-email?verified=1` page. Protected API routes also apply Laravel's `verified` middleware; unverified users receive HTTP `403` rather than account data.
+
+In development, when `MAIL_MAILER=log`, Laravel writes the complete verification message and its one-time signed URL to the configured application log (normally `storage/logs/laravel.log`, resolved under the runtime storage path). Treat that log as sensitive: do not paste the message or URL into tickets, chat, or committed files. Use a real mail transport in production.
+
 ## Refresh and page navigation
 
 Nuxt route middleware calls `/api/bff/v1/auth/user` for protected pages. The BFF:
@@ -51,7 +63,7 @@ The storefront is guest-first:
 
 ## Logout
 
-The Nuxt logout endpoint attempts to revoke the Passport token, clears the Laravel web session, and deletes both browser token cookies.
+The Nuxt logout endpoint revokes the current Passport access/refresh token when possible and always deletes the browser's access and refresh token cookies. It does not attempt to clear Laravel's separate authorization-server web session through an internal server-to-server call: that call does not carry the browser's Laravel session and cannot invalidate it. A later authorization may reuse the Laravel sign-in session, while the Nuxt app remains logged out until a new OAuth authorization flow completes.
 
 ## Security requirements
 
@@ -59,6 +71,7 @@ The Nuxt logout endpoint attempts to revoke the Passport token, clears the Larav
 - Set `NUXT_AUTH_COOKIE_SECURE=true`.
 - Keep `BFF_SHARED_SECRET` and `NUXT_BFF_SHARED_SECRET` out of git.
 - Register exact redirect URIs for each environment.
+- Require verified email for protected API access and keep the signed verification URL private.
 - Do not place access or refresh tokens in localStorage, Pinia persistence, or Vue state.
 - Use sibling frontend/API domains or redesign the login bootstrap before deploying to unrelated domains.
 
@@ -67,4 +80,3 @@ The Nuxt logout endpoint attempts to revoke the Passport token, clears the Larav
 - [API Reference](api.md) — protected endpoint list
 - [Configuration](configuration.md) — auth environment variables
 - [Deployment](deployment.md) — production security checklist
-

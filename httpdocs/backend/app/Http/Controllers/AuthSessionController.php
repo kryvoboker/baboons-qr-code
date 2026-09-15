@@ -39,8 +39,16 @@ final class AuthSessionController extends Controller
     private function allowedRedirect(string $redirect, Request $request): string
     {
         $parsed = parse_url($redirect);
+        $path = $parsed['path'] ?? '';
+        $isOAuthRedirect = $path === '/oauth/authorize';
+        $isEmailVerificationRedirect = preg_match('#^/email/verify/[0-9]+/[a-f0-9]{40}$#D', $path) === 1;
 
-        if (($parsed['host'] ?? null) === $request->getHost() && ($parsed['path'] ?? null) === '/oauth/authorize') {
+        if (
+            ($parsed['host'] ?? null) === $request->getHost()
+            && ($parsed['scheme'] ?? null) === ($request->isSecure() ? 'https' : 'http')
+            && (($parsed['port'] ?? null) === null || $parsed['port'] === $request->getPort())
+            && ($isOAuthRedirect || $isEmailVerificationRedirect)
+        ) {
             return $redirect;
         }
 
