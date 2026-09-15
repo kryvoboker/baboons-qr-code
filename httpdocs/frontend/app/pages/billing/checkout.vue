@@ -45,7 +45,9 @@ onMounted(() => void loadPlan());
 </script>
 
 <template>
-    <section class="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+    <section>
+        <div class="container">
+            <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6">
         <div class="mb-6">
             <NuxtLink class="btn btn-text btn-sm px-0" to="/pricing">
                 <span class="icon-[tabler--arrow-left] size-4" />Back to plans
@@ -89,6 +91,8 @@ onMounted(() => void loadPlan());
                     <p class="text-base-content/50 text-xs">Recurring monthly until cancelled. Tax handling belongs to the selected payment provider and deployment jurisdiction.</p>
                 </div>
             </aside>
+        </div>
+            </div>
         </div>
     </section>
 </template>

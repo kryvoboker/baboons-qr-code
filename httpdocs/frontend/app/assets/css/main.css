@@ -21,7 +21,7 @@
 
 @layer utilities {
     .container {
-        @apply max-w-480 px-2 xl:px-10 mx-auto my-0;
+        @apply 2xl:max-w-480 px-2 xl:px-10 mx-auto my-0;
     }
 
     .container .container {

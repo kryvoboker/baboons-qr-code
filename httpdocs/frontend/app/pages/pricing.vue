@@ -28,7 +28,9 @@ onMounted(() => void load());
 </script>
 
 <template>
-    <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <section>
+        <div class="container">
+            <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-2xl text-center">
             <span class="badge badge-primary badge-soft">Simple monthly pricing</span>
             <h1 class="mt-3 text-4xl font-semibold">Pay for dynamic control, not for basic QR codes.</h1>
@@ -76,6 +78,8 @@ onMounted(() => void load());
                     </NuxtLink>
                 </div>
             </article>
+        </div>
+            </div>
         </div>
     </section>
 </template>

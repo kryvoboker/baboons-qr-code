@@ -126,6 +126,8 @@ const uploadLogo = async (event: Event) => {
 
         <div class="mt-4 space-y-4">
             <section aria-labelledby="qr-dots-heading">
+                <div class="container">
+                    <div>
                 <div class="mb-2">
                     <h3 id="qr-dots-heading" class="font-medium">Dots</h3>
                     <p class="text-base-content/50 text-xs">The shapes used for the QR code modules.</p>
@@ -147,9 +149,13 @@ const uploadLogo = async (event: Event) => {
                         </select>
                     </label>
                 </div>
+                    </div>
+                </div>
             </section>
 
-            <section aria-labelledby="qr-finder-frames-heading" class="border-base-content/10 border-t pt-4">
+            <section aria-labelledby="qr-finder-frames-heading">
+                <div class="container">
+                    <div class="border-base-content/10 border-t pt-4">
                 <div class="mb-2">
                     <h3 id="qr-finder-frames-heading" class="font-medium">Finder frames</h3>
                     <p class="text-base-content/50 text-xs">The outer shapes around the three QR code markers.</p>
@@ -172,9 +178,13 @@ const uploadLogo = async (event: Event) => {
                         </select>
                     </label>
                 </div>
+                    </div>
+                </div>
             </section>
 
-            <section aria-labelledby="qr-finder-centers-heading" class="border-base-content/10 border-t pt-4">
+            <section aria-labelledby="qr-finder-centers-heading">
+                <div class="container">
+                    <div class="border-base-content/10 border-t pt-4">
                 <div class="mb-2">
                     <h3 id="qr-finder-centers-heading" class="font-medium">Finder centers</h3>
                     <p class="text-base-content/50 text-xs">The inner shapes inside the three QR code markers.</p>
@@ -197,9 +207,13 @@ const uploadLogo = async (event: Event) => {
                         </select>
                     </label>
                 </div>
+                    </div>
+                </div>
             </section>
 
-            <section aria-labelledby="qr-other-settings-heading" class="border-base-content/10 border-t pt-4">
+            <section aria-labelledby="qr-other-settings-heading">
+                <div class="container">
+                    <div class="border-base-content/10 border-t pt-4">
                 <h3 id="qr-other-settings-heading" class="mb-2 font-medium">Other settings</h3>
                 <div class="grid gap-3 sm:grid-cols-2">
                     <label class="form-control">
@@ -215,6 +229,8 @@ const uploadLogo = async (event: Event) => {
                             <option>H</option>
                         </select>
                     </label>
+                </div>
+                    </div>
                 </div>
             </section>
         </div>
