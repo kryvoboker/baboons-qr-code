@@ -34,9 +34,11 @@ useHead({ title: 'Reset password' });
 </script>
 
 <template>
-    <main class="mx-auto flex min-h-[70vh] max-w-md items-center px-4 py-12">
-        <section class="card bg-base-100 border-base-content/10 w-full border shadow-sm">
-            <div class="card-body gap-5">
+    <main class="flex min-h-[70vh] items-center py-12">
+        <section>
+            <div class="container">
+                <div class="card bg-base-100 border-base-content/10 mx-auto w-full max-w-md border shadow-sm">
+                    <div class="card-body gap-5">
                 <div>
                     <p class="text-primary text-sm font-semibold">Account recovery</p>
                     <h1 class="text-2xl font-bold">Set a new password</h1>
@@ -82,6 +84,8 @@ useHead({ title: 'Reset password' });
                 </form>
 
                 <NuxtLink class="link link-primary text-sm" to="/auth/login">Back to sign in</NuxtLink>
+                    </div>
+                </div>
             </div>
         </section>
     </main>

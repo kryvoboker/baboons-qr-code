@@ -1,6 +1,52 @@
 <script setup lang="ts">
-useHead({ title: 'Create account' }); const { register } = usePassportAuth();
-const form = reactive({ name: '', email: '', password: '' }); const pending = ref(false); const error = ref('');
-const submit = async () => { pending.value = true; error.value = ''; try { await register(form.name, form.email, form.password); } catch { error.value = 'Could not create the account. Check the fields and try again.'; pending.value = false; } };
+useHead({ title: 'Create account' });
+const { register } = usePassportAuth();
+const form = reactive({ name: '', email: '', password: '' });
+const pending = ref(false);
+const error = ref('');
+const submit = async () => {
+    pending.value = true;
+    error.value = '';
+    try {
+        await register(form.name, form.email, form.password);
+    } catch {
+        error.value = 'Could not create the account. Check the fields and try again.';
+        pending.value = false;
+    }
+};
 </script>
-<template><section class="mx-auto max-w-lg px-4 py-12 sm:px-6"><div class="card border-base-content/10 border shadow-sm"><form class="card-body" @submit.prevent="submit"><div><span class="badge badge-primary badge-soft">Free account</span><h1 class="mt-3 text-2xl font-semibold">Save your QR codes and templates</h1><p class="text-base-content/60 mt-1 text-sm">You only need a paid plan when you create dynamic QR codes.</p></div><div v-if="error" class="alert alert-error alert-soft">{{ error }}</div><label class="form-control"><span class="label-text mb-1">Name</span><input v-model="form.name" class="input" autocomplete="name" required /></label><label class="form-control"><span class="label-text mb-1">Email</span><input v-model="form.email" type="email" class="input" autocomplete="email" required /></label><label class="form-control"><span class="label-text mb-1">Password</span><input v-model="form.password" type="password" class="input" autocomplete="new-password" minlength="10" required /><span class="text-base-content/50 mt-1 text-xs">At least 10 characters.</span></label><button class="btn btn-primary" :disabled="pending"><span v-if="pending" class="loading loading-spinner loading-sm" />Create account</button><p class="text-base-content/60 text-center text-sm">Already registered? <NuxtLink class="link link-primary" to="/auth/login">Log in</NuxtLink></p></form></div></section></template>
+<template>
+    <section>
+        <div class="container">
+            <div class="mx-auto max-w-lg px-4 py-12 sm:px-6">
+                <div class="card border-base-content/10 border shadow-sm">
+                    <form class="card-body" @submit.prevent="submit">
+                        <div>
+                            <span class="badge badge-primary badge-soft">Free account</span>
+                            <h1 class="mt-3 text-2xl font-semibold">Save your QR codes and templates</h1>
+                            <p class="text-base-content/60 mt-1 text-sm">You only need a paid plan when you create dynamic QR codes.</p>
+                        </div>
+                        <div v-if="error" class="alert alert-error alert-soft">{{ error }}</div>
+                        <label class="form-control">
+                            <span class="label-text mb-1">Name</span>
+                            <input v-model="form.name" class="input" autocomplete="name" required />
+                        </label>
+                        <label class="form-control">
+                            <span class="label-text mb-1">Email</span>
+                            <input v-model="form.email" type="email" class="input" autocomplete="email" required />
+                        </label>
+                        <label class="form-control">
+                            <span class="label-text mb-1">Password</span>
+                            <input v-model="form.password" type="password" class="input" autocomplete="new-password" minlength="10" required />
+                            <span class="text-base-content/50 mt-1 text-xs">At least 10 characters.</span>
+                        </label>
+                        <button class="btn btn-primary" :disabled="pending">
+                            <span v-if="pending" class="loading loading-spinner loading-sm" />Create account
+                        </button>
+                        <p class="text-base-content/60 text-center text-sm">Already registered? <NuxtLink class="link link-primary" to="/auth/login">Log in</NuxtLink></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>

@@ -31,15 +31,19 @@ onMounted(async () => {
 </script>
 
 <template>
-    <section class="mx-auto flex min-h-[60vh] max-w-lg items-center justify-center px-4">
-        <div class="text-center">
-            <span v-if="!error" class="loading loading-spinner loading-lg text-primary" />
-            <span v-else class="icon-[tabler--alert-triangle] text-error mx-auto size-10" />
-            <h1 class="mt-4 text-xl font-semibold">
-                {{ error ? 'Could not sign you in' : 'Finishing secure sign-in…' }}
-            </h1>
-            <p v-if="error" class="text-base-content/60 mt-2">{{ error }}</p>
-            <NuxtLink v-if="error" to="/auth/login" class="btn btn-primary mt-4">Try again</NuxtLink>
+    <section>
+        <div class="container">
+            <div class="mx-auto flex min-h-[60vh] max-w-lg items-center justify-center px-4">
+                <div class="text-center">
+                    <span v-if="!error" class="loading loading-spinner loading-lg text-primary" />
+                    <span v-else class="icon-[tabler--alert-triangle] text-error mx-auto size-10" />
+                    <h1 class="mt-4 text-xl font-semibold">
+                        {{ error ? 'Could not sign you in' : 'Finishing secure sign-in…' }}
+                    </h1>
+                    <p v-if="error" class="text-base-content/60 mt-2">{{ error }}</p>
+                    <NuxtLink v-if="error" to="/auth/login" class="btn btn-primary mt-4">Try again</NuxtLink>
+                </div>
+            </div>
         </div>
     </section>
 </template>
