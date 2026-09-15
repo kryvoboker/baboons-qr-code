@@ -7,7 +7,7 @@
 @import "flyonui/variants.css";
 
 @plugin "flyonui" {
-    root: "#__nuxt";
+    root: "html";
     themes: light --default, black --prefersdark;
     logs: true;
 }
