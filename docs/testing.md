@@ -12,11 +12,22 @@ docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-php-fpm vendor/
 ## Frontend
 
 ```bash
+docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-nodejs npm run test:helpers
 docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-nodejs npm run ts:typecheck
 docker compose -f .docker/dev/docker-compose.yml exec -T qr-code-nodejs npm run ts:check
 ```
 
-`ts:typecheck` runs TypeScript only. `ts:check` also runs Biome and can report formatting/lint issues.
+`test:helpers` type-checks and runs the built-in Node tests for browser storage helpers, safe JSON handling, persisted QR value validation, array helpers, and internal return-path validation. It uses Node's built-in test/assert APIs and does not add a test dependency.
+
+For the QR-rendering browser E2E check, first start the development Compose stack, then run this from `httpdocs/frontend` on the host:
+
+```bash
+npm run test:e2e
+```
+
+The E2E test uses Playwright with the installed system Chrome (`/usr/bin/google-chrome` by default), loads the Nuxt app at `http://127.0.0.1:3000`, and checks that `/api/renderer/preview` returns SVG `200`, the preview image loads, and the page emits no console or uncaught JavaScript errors. Override `CHROME_BIN` or `PLAYWRIGHT_BASE_URL` when the browser executable or app URL differs.
+
+`ts:typecheck` runs the Nuxt TypeScript checks. `ts:check` also runs Biome and can report formatting/lint issues.
 
 ## API smoke checks
 

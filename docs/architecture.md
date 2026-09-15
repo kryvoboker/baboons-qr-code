@@ -59,9 +59,19 @@ httpdocs/qr-renderer/                            Node rendering service
 
 New backend capabilities should preserve the dependency direction `Controllers → Services → Models/Repositories`.
 
+## Frontend helper conventions
+
+Reusable browser and data helpers live in `httpdocs/frontend/app/utils/helpers.ts`. Use these helpers for local/session storage access, safe JSON serialization and parsing, array conversion, and runtime type checks instead of repeating those low-level operations in components or composables.
+
+- Storage helpers are safe to call from shared Nuxt code: on the server or when browser storage is blocked they return `null`/`false` instead of throwing. Callers should handle failure when the user depends on the value being saved.
+- Treat browser storage as untrusted input. Parse persisted JSON with an explicit type guard; the QR draft and template guards are in `app/utils/qr-validation.ts`.
+- Store only non-authentication state in browser storage. Never put Passport access/refresh tokens, session cookies, or server secrets there.
+- `arrayFrom` and `isArray` centralize array conversion and checking. Keep ordinary operations such as `map`, `filter`, and `find` native unless a reusable helper adds meaningful validation or fallback behavior.
+- Nitro handlers must not use browser storage helpers. Keep straightforward server operations such as `FormData` lookup native unless a server-safe helper provides real reuse.
+- `nuxt.config.ts` intentionally keeps a small guarded `localStorage` read in its inline theme bootstrap. It runs before the Nuxt app bundle so the saved theme can be applied before rendering and avoid a flash; app utility modules cannot be imported there.
+
 ## See Also
 
 - [API Reference](api.md) — HTTP contracts
 - [Authentication](authentication.md) — OAuth and BFF flow
 - [QR Codes and Storage](qr-codes.md) — rendering and persistence
-
