@@ -78,6 +78,56 @@ test('applies the selected one-pixel size and image format to preview rendering'
     expect(previewResponse?.status).toBe(200);
 });
 
+test('renders a selected logo in raster QR previews', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('img', { name: 'QR code preview' })).toBeVisible();
+
+    const presetLogos = ['facebook', 'instagram', 'telegram', 'viber', 'whatsapp', 'x', 'youtube'];
+    for (const logoName of presetLogos) {
+        const logoSvg = await page.evaluate(async (name) => {
+            const response = await fetch(`/images/social/${name}.svg`);
+            return response.text();
+        }, logoName);
+
+        expect(logoSvg).not.toMatch(/<text\b/i);
+        expect(logoSvg).toMatch(/<(?:path|circle|rect)\b/i);
+    }
+
+    await page.getByRole('button', { name: 'Telegram', exact: true }).click();
+
+    for (const format of ['SVG', 'PNG', 'JPG'] as const) {
+        await page.getByRole('radio', { name: format }).check();
+        const image = page.getByRole('img', { name: 'QR code preview' });
+        const readCenterPixel = () =>
+            image.evaluate((element) => {
+                const preview = element as HTMLImageElement;
+                if (!preview.complete || preview.naturalWidth === 0) return null;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = preview.naturalWidth;
+                canvas.height = preview.naturalHeight;
+                const context = canvas.getContext('2d');
+                if (!context) return null;
+
+                context.drawImage(preview, 0, 0);
+                return [...context.getImageData(canvas.width / 2, canvas.height / 2, 1, 1).data].slice(0, 3);
+            });
+
+        await expect
+            .poll(async () => {
+                const pixel = await readCenterPixel();
+                return pixel !== null && pixel[2] > pixel[1] && pixel[2] > pixel[0];
+            })
+            .toBe(true);
+
+        const logoColor = await readCenterPixel();
+        expect(logoColor).not.toBeNull();
+        if (!logoColor) throw new Error('QR preview logo pixel could not be read.');
+        expect(logoColor[2]).toBeGreaterThan(logoColor[1]);
+        expect(logoColor[2]).toBeGreaterThan(logoColor[0]);
+    }
+});
+
 test('downloads the selected image format with the matching file extension', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('img', { name: 'QR code preview' })).toBeVisible();
