@@ -1,6 +1,8 @@
 <script setup lang="ts">
+// biome-ignore lint/style/useImportType: designPresets is referenced by the Vue template at runtime.
 import { designPresets, socialLogos } from '~/data/qr-presets';
 import type { QrDraft } from '~/types/qr';
+import { arrayFrom, getLocalStorageItem, setLocalStorageItem } from '~/utils/helpers';
 
 const draft = defineModel<QrDraft>({ required: true });
 const storageBase = useRuntimeConfig().public.storageBase;
@@ -9,12 +11,12 @@ const uploadError = ref('');
 
 const guestSessionKey = () => {
     const keyName = 'baboons-guest-session';
-    let key = localStorage.getItem(keyName);
+    let key = getLocalStorageItem(keyName);
 
     if (!key) {
         const bytes = crypto.getRandomValues(new Uint8Array(32));
-        key = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
-        localStorage.setItem(keyName, key);
+        key = arrayFrom(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+        setLocalStorageItem(keyName, key);
     }
 
     return key;

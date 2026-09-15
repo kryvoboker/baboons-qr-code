@@ -1,35 +1,30 @@
 <script setup lang="ts">
+import type { QrDraft } from '~/types/qr';
+import { getSessionStorageJson, removeSessionStorageItem, setSessionStorageJson } from '~/utils/helpers';
+import { isPendingQrTemplate, isQrDraft, type PendingQrTemplate } from '~/utils/qr-validation';
+
 const { draft, previewUrl, previewPending, setKind, syncData, preview, queuePreview } = useQrGenerator();
-const savePending                                                                     = ref(false);
-const saveError                                                                       = ref('');
+const savePending = ref(false);
+const saveError = ref('');
 
 watch(draft, queuePreview, { deep: true });
 onMounted(() => {
-    const pending = sessionStorage.getItem('baboons-pending-draft');
-    if (pending) {
-        try {
-            draft.value = JSON.parse(pending);
-            sessionStorage.removeItem('baboons-pending-draft');
-        } catch {
-            sessionStorage.removeItem('baboons-pending-draft');
-        }
+    const parsedDraft = getSessionStorageJson<QrDraft>('baboons-pending-draft', isQrDraft);
+    if (parsedDraft) {
+        removeSessionStorageItem('baboons-pending-draft');
+        draft.value = parsedDraft;
     } else {
-        const template = sessionStorage.getItem('baboons-pending-template');
-        if (template) {
-            try {
-                const parsed = JSON.parse(template) as {
-                    kind?: typeof draft.value.kind;
-                    design?: typeof draft.value.design;
-                    name?: string;
-                };
-                if (parsed.kind) setKind(parsed.kind);
-                if (parsed.design) draft.value.design = structuredClone(parsed.design);
-                if (parsed.name) draft.value.name = parsed.name;
-            } catch {
-                // Ignore a damaged local template hand-off and keep the default draft.
-            } finally {
-                sessionStorage.removeItem('baboons-pending-template');
-            }
+        removeSessionStorageItem('baboons-pending-draft');
+        const parsedTemplate = getSessionStorageJson<PendingQrTemplate>(
+            'baboons-pending-template',
+            isPendingQrTemplate,
+        );
+        removeSessionStorageItem('baboons-pending-template');
+
+        if (parsedTemplate) {
+            setKind(parsedTemplate.kind);
+            draft.value.design = structuredClone(parsedTemplate.design);
+            draft.value.name = parsedTemplate.name;
         }
     }
 
@@ -39,45 +34,55 @@ onMounted(() => {
 const save = async () => {
     syncData();
     savePending.value = true;
-    saveError.value   = '';
+    saveError.value = '';
 
     try {
         const response = await $fetch<{
             data: {
-                id: string
-            }
+                id: string;
+            };
         }>('/api/bff/v1/qr-codes', {
             method: 'POST',
-            body:   {
-                name:            draft.value.name,
-                kind:            draft.value.kind,
-                mode:            draft.value.mode,
-                payload:         {
-                    data:   draft.value.data,
+            body: {
+                name: draft.value.name,
+                kind: draft.value.kind,
+                mode: draft.value.mode,
+                payload: {
+                    data: draft.value.data,
                     fields: draft.value.fields,
                 },
-                design:          draft.value.design,
-                folder_id:       draft.value.folderId,
+                design: draft.value.design,
+                folder_id: draft.value.folderId,
                 destination_url: draft.value.mode === 'dynamic' ? draft.value.destinationUrl : null,
             },
         });
 
         await navigateTo(`/qr-codes/${response.data.id}`);
     } catch (error: unknown) {
-        const status = (error as {
-            response?: {
-                status?: number
+        const status = (
+            error as {
+                response?: {
+                    status?: number;
+                };
             }
-        })?.response?.status;
+        )?.response?.status;
 
         if (status === 401) {
-            sessionStorage.setItem('baboons-pending-draft', JSON.stringify(draft.value));
+            if (!setSessionStorageJson('baboons-pending-draft', draft.value)) {
+                saveError.value = 'Your QR code could not be kept in this browser. Please try saving again.';
+                return;
+            }
+
             await navigateTo('/auth/register?reason=save');
             return;
         }
 
         if (status === 422 && draft.value.mode === 'dynamic') {
-            sessionStorage.setItem('baboons-pending-draft', JSON.stringify(draft.value));
+            if (!setSessionStorageJson('baboons-pending-draft', draft.value)) {
+                saveError.value = 'Your QR code could not be kept in this browser. Please try saving again.';
+                return;
+            }
+
             await navigateTo('/pricing?reason=dynamic');
             return;
         }
@@ -92,17 +97,17 @@ const download = async () => {
     syncData();
 
     const blob = await $fetch<Blob>('/api/renderer/download', {
-        method:       'POST',
-        body:         {
-            options: { ... draft.value.design, data: draft.value.data },
-            format:  'png',
+        method: 'POST',
+        body: {
+            options: { ...draft.value.design, data: draft.value.data },
+            format: 'png',
         },
         responseType: 'blob',
     });
 
-    const url       = URL.createObjectURL(blob);
-    const anchor    = document.createElement('a');
-    anchor.href     = url;
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
     anchor.download = `${draft.value.name || 'qr-code'}.png`;
     anchor.click();
     URL.revokeObjectURL(url);

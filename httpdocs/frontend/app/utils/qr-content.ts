@@ -10,7 +10,10 @@ const calendarDate = (value: string): string => {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return '';
 
-    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    return date
+        .toISOString()
+        .replace(/[-:]/g, '')
+        .replace(/\.\d{3}Z$/, 'Z');
 };
 
 export const defaultFieldsFor = (kind: QrKind): QrFields => {
@@ -62,11 +65,7 @@ export const buildQrData = (draft: Pick<QrDraft, 'kind' | 'fields'>): string => 
         }
 
         case 'vcard': {
-            const lines = [
-                'BEGIN:VCARD',
-                'VERSION:3.0',
-                `FN:${escapeVcard(field(fields, 'name'))}`,
-            ];
+            const lines = ['BEGIN:VCARD', 'VERSION:3.0', `FN:${escapeVcard(field(fields, 'name'))}`];
 
             if (field(fields, 'organization')) lines.push(`ORG:${escapeVcard(field(fields, 'organization'))}`);
             if (field(fields, 'phone')) lines.push(`TEL:${escapeVcard(field(fields, 'phone'))}`);

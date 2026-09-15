@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { dynamicKinds } from '~/utils/qr-content';
 import type { QrDraft } from '~/types/qr';
+import { dynamicKinds } from '~/utils/qr-content';
 
 const props = withDefaults(defineProps<{ allowModeChange?: boolean }>(), { allowModeChange: true });
 const draft = defineModel<QrDraft>({ required: true });

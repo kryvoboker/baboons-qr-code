@@ -15,9 +15,10 @@ const percent = (value: number, limit: number | null | undefined) => {
     return Math.min(100, Math.round((value / limit) * 100));
 };
 
-const formatDate = (value: string | null) => value
-    ? new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(value))
-    : '—';
+const formatDate = (value: string | null) =>
+    value
+        ? new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(value))
+        : '—';
 
 const load = async () => {
     pending.value = true;

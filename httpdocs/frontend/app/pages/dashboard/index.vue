@@ -36,7 +36,9 @@ const usagePercent = computed(() => {
 const stats = computed(() => [
     {
         label: 'Dynamic QR codes',
-        value: dynamicLimit.value ? `${data.value?.dynamic_qr_count || 0} / ${dynamicLimit.value}` : String(data.value?.dynamic_qr_count || 0),
+        value: dynamicLimit.value
+            ? `${data.value?.dynamic_qr_count || 0} / ${dynamicLimit.value}`
+            : String(data.value?.dynamic_qr_count || 0),
         icon: 'icon-[tabler--qrcode]',
     },
     {

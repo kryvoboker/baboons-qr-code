@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { qrKinds } from '~/data/qr-presets';
 import type { QrKind } from '~/types/qr';
-defineProps<{ modelValue: QrKind }>(); const emit = defineEmits<{ 'update:modelValue': [QrKind] }>();
+
+defineProps<{ modelValue: QrKind }>();
+const emit = defineEmits<{ 'update:modelValue': [QrKind] }>();
 </script>
 <template>
     <div>

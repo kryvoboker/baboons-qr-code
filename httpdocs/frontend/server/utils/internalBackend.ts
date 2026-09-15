@@ -1,10 +1,6 @@
 import type { H3Event } from 'h3';
 
-export const internalBackendFetchRaw = async (
-    event: H3Event,
-    path: string,
-    options: Record<string, unknown> = {},
-) => {
+export const internalBackendFetchRaw = async (event: H3Event, path: string, options: Record<string, unknown> = {}) => {
     const config = useRuntimeConfig(event);
     const incomingCookie = getRequestHeader(event, 'cookie');
 

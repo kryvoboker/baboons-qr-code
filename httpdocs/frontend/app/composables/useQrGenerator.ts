@@ -1,6 +1,6 @@
 import { defaultDesign } from '~/data/qr-presets';
-import { buildQrData, defaultFieldsFor, dynamicKinds } from '~/utils/qr-content';
 import type { QrDraft, QrKind } from '~/types/qr';
+import { buildQrData, defaultFieldsFor, dynamicKinds } from '~/utils/qr-content';
 
 const createDraft = (): QrDraft => {
     const fields = defaultFieldsFor('url');

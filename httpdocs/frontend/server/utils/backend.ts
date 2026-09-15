@@ -53,22 +53,19 @@ const refreshPassportToken = async (event: H3Event): Promise<string | null> => {
     }
 };
 
-export const backendFetch = async <T>(
-    event: H3Event,
-    path: string,
-    options: FetchOptions = {},
-): Promise<T> => {
+export const backendFetch = async <T>(event: H3Event, path: string, options: FetchOptions = {}): Promise<T> => {
     const config = useRuntimeConfig(event);
-    const request = async (accessToken?: string) => await $fetch<T>(path, {
-        baseURL: config.backendInternalBase,
-        ...options,
-        headers: {
-            accept: 'application/json',
-            'x-baboons-bff-secret': config.bffSharedSecret,
-            ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
-            ...((options.headers as Record<string, string> | undefined) ?? {}),
-        },
-    });
+    const request = async (accessToken?: string) =>
+        await $fetch<T>(path, {
+            baseURL: config.backendInternalBase,
+            ...options,
+            headers: {
+                accept: 'application/json',
+                'x-baboons-bff-secret': config.bffSharedSecret,
+                ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
+                ...((options.headers as Record<string, string> | undefined) ?? {}),
+            },
+        });
 
     const accessToken = getCookie(event, 'bqr_access_token');
 

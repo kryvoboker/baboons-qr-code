@@ -36,9 +36,7 @@ const draft = ref<QrDraft>({
 
 const effectiveData = computed(() => {
     if (!qr.value) return draft.value.data;
-    return draft.value.mode === 'dynamic'
-        ? `${config.public.backendBase}/r/${qr.value.slug}`
-        : draft.value.data;
+    return draft.value.mode === 'dynamic' ? `${config.public.backendBase}/r/${qr.value.slug}` : draft.value.data;
 });
 
 const load = async () => {
@@ -128,10 +126,8 @@ const save = async () => {
 };
 
 const loadAnalytics = async () => {
-    if (!qr.value || qr.value.mode !== 'dynamic') return;
-    const response = await $fetch<{ data: typeof analytics.value }>(
-        `/api/bff/v1/qr-codes/${qr.value.id}/analytics`,
-    );
+    if (qr.value?.mode !== 'dynamic') return;
+    const response = await $fetch<{ data: typeof analytics.value }>(`/api/bff/v1/qr-codes/${qr.value.id}/analytics`);
     analytics.value = response.data;
 };
 

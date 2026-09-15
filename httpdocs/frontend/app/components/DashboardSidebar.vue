@@ -1,5 +1,6 @@
 <script setup lang="ts">
-defineProps<{ mobileOpen: boolean }>(); defineEmits<{ close: [] }>();
+defineProps<{ mobileOpen: boolean }>();
+defineEmits<{ close: [] }>();
 const links = [
     { to: '/dashboard', label: 'Overview', icon: 'icon-[tabler--layout-dashboard]' },
     { to: '/qr-codes', label: 'QR codes', icon: 'icon-[tabler--qrcode]' },

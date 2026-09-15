@@ -5,6 +5,8 @@
         "includes": [
             "app/**/*.ts",
             "app/**/*.vue",
+            "tests/**/*.ts",
+            "playwright.config.ts",
             "server/**/*.ts",
             "nuxt.config.ts",
             "vite-env.d.ts"
@@ -45,9 +47,22 @@
     "linter": {
         "enabled": true,
         "rules": {
-            "recommended": true
+            "preset": "recommended"
         }
     },
+    "overrides": [
+        {
+            "includes": ["app/**/*.vue"],
+            "linter": {
+                "rules": {
+                    "correctness": {
+                        "noUnusedImports": "off",
+                        "noUnusedVariables": "off"
+                    }
+                }
+            }
+        }
+    ],
     "vcs": {
         "enabled": true,
         "clientKind": "git",

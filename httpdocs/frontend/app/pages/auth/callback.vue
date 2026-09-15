@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getSafeInternalPath, getSessionStorageItem, removeSessionStorageItem } from '~/utils/helpers';
+
 useHead({ title: 'Signing in' });
 
 const route = useRoute();
@@ -13,9 +15,9 @@ onMounted(async () => {
 
         await finishCallback(code, state);
 
-        const returnTo = sessionStorage.getItem('baboons-return-to');
-        const pendingDraft = sessionStorage.getItem('baboons-pending-draft');
-        sessionStorage.removeItem('baboons-return-to');
+        const returnTo = getSafeInternalPath(getSessionStorageItem('baboons-return-to'), window.location.origin);
+        const pendingDraft = getSessionStorageItem('baboons-pending-draft');
+        removeSessionStorageItem('baboons-return-to');
 
         if (returnTo) {
             await navigateTo(returnTo);

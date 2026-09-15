@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ApiQrTemplate } from '~/types/api';
+import { setSessionStorageJson } from '~/utils/helpers';
 
 const storageBase = useRuntimeConfig().public.storageBase;
 definePageMeta({ layout: 'dashboard', middleware: 'auth' });
@@ -26,10 +27,17 @@ const load = async () => {
 };
 
 const useTemplate = async (template: ApiQrTemplate) => {
-    sessionStorage.setItem(
-        'baboons-pending-template',
-        JSON.stringify({ kind: template.kind, design: template.design, name: `${template.name} QR` }),
-    );
+    const stored = setSessionStorageJson('baboons-pending-template', {
+        kind: template.kind,
+        design: template.design,
+        name: `${template.name} QR`,
+    });
+
+    if (!stored) {
+        errorMessage.value = 'Could not prepare this template in browser storage. Please try again.';
+        return;
+    }
+
     await navigateTo('/?template=1#generator');
 };
 

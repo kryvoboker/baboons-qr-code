@@ -46,7 +46,9 @@ const presentation = (item: ApiNotification) => {
 
     if (event === 'subscription.renewal_reminder') {
         const end = item.data.current_period_end
-            ? new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(String(item.data.current_period_end)))
+            ? new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(
+                  new Date(String(item.data.current_period_end)),
+              )
             : 'soon';
         return {
             title: 'Subscription renews soon',

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { QrDraft } from '~/types/qr';
-defineProps<{ draft: QrDraft; previewUrl: string; pending: boolean }>(); defineEmits<{ refresh: []; save: []; download: [] }>();
+
+defineProps<{ draft: QrDraft; previewUrl: string; pending: boolean }>();
+defineEmits<{ refresh: []; save: []; download: [] }>();
 </script>
 <template>
     <aside class="card bg-base-100 border-base-content/10 sticky top-24 border shadow-sm">
@@ -8,7 +10,13 @@ defineProps<{ draft: QrDraft; previewUrl: string; pending: boolean }>(); defineE
             <div class="flex items-center justify-between"><div><h2 class="font-semibold">Preview</h2><p class="text-base-content/60 text-xs">Scannable preview from renderer service</p></div><span :class="['badge badge-sm', draft.mode === 'dynamic' ? 'badge-primary' : 'badge-soft']">{{ draft.mode }}</span></div>
             <div class="bg-base-200 rounded-box my-4 flex aspect-square items-center justify-center p-6">
                 <span v-if="pending" class="loading loading-spinner loading-lg" />
-                <ResponsiveImage v-else-if="previewUrl" :src="previewUrl" alt="QR code preview" class="max-h-full max-w-full rounded-lg" eager />
+                <ResponsiveImage
+                    v-else-if="previewUrl"
+                    :src="previewUrl"
+                    alt="QR code preview"
+                    class="max-h-full max-w-full rounded-lg"
+                    loading="eager"
+                />
                 <div v-else class="text-base-content/50 text-center"><span class="icon-[tabler--qrcode] mx-auto size-20" /><p class="mt-2 text-sm">Preview will appear here</p></div>
             </div>
             <button class="btn btn-outline w-full" @click="$emit('refresh')"><span class="icon-[tabler--refresh] size-4" />Refresh preview</button>

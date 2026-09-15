@@ -18,7 +18,8 @@ export default defineNuxtConfig({
             backendBase: process.env.NUXT_PUBLIC_BACKEND_BASE || 'http://dev.api.qr-code.com',
             storageBase: process.env.NUXT_PUBLIC_STORAGE_BASE || 'http://localhost:8082',
             passportClientId: process.env.NUXT_PUBLIC_PASSPORT_CLIENT_ID || '',
-            passportRedirectUri: process.env.NUXT_PUBLIC_PASSPORT_REDIRECT_URI || 'http://dev.qr-code.com/auth/callback',
+            passportRedirectUri:
+                process.env.NUXT_PUBLIC_PASSPORT_REDIRECT_URI || 'http://dev.qr-code.com/auth/callback',
         },
     },
     routeRules: {
